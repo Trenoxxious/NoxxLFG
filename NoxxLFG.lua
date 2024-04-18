@@ -2,7 +2,7 @@
 NoxxLFG = NoxxLFG or {}
 
 local addonName = "NoxxLFG"
-local versionNum = "1.3.3"
+local versionNum = "1.4.0"
 local headerColor = "|cFFFCC453"
 local LibDD = LibStub:GetLibrary("LibUIDropDownMenu-4.0")
 local shortMessageLength = 35
