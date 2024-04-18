@@ -10,12 +10,14 @@ local hoveredCategory = false
 local lfmCreationMessage = ""
 local lfgCreationMessage = ""
 local postingMessage = false
+local postingLFGMessage = false
 local triedToShowPopup = false
 local triedToShowPlayerNames = {}
 local postingMessageTimer = 30
 local totalRoles = 0
 local startedWithRoles = false
 local messageTimer
+local LFGMessageTimer
 
 local classColor = {
 	["WARRIOR"] = "FFC79C6E",
@@ -33,6 +35,13 @@ local function CancelTimer()
 	if not postingMessage and messageTimer then
 		messageTimer:Cancel()
 		messageTimer = nil
+	end
+end
+
+local function CancelLFGTimer()
+	if not postingLFGMessage and LFGMessageTimer then
+		LFGMessageTimer:Cancel()
+		LFGMessageTimer = nil
 	end
 end
 
@@ -467,7 +476,7 @@ mainFrame.title = mainFrame:CreateFontString(nil, "OVERLAY")
 mainFrame.title:SetFontObject("GameFontHighlight")
 mainFrame.title:SetPoint("TOPLEFT", mainFrame.TitleBg, "TOPLEFT", 5, 0)
 mainFrame.title:SetText(
-	"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t " .. NoxxLFGBlueColor .. "NoxxLFG v" .. versionNum .. "|r"
+	"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t " .. NoxxLFGBlueColor .. addonName .. " v" .. versionNum .. "|r"
 )
 mainFrame:EnableMouse(true)
 mainFrame:SetMovable(true)
@@ -562,7 +571,7 @@ settingsFrame:SetSize(400, 500)
 settingsFrame.TitleBg:SetHeight(30)
 settingsFrame.title = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 settingsFrame.title:SetPoint("TOPLEFT", settingsFrame.TitleBg, "TOPLEFT", 5, -2)
-settingsFrame.title:SetText(NoxxLFGBlueColor .. "NoxxLFG|r Settings")
+settingsFrame.title:SetText(NoxxLFGBlueColor .. addonName .. "|r Settings")
 settingsFrame:EnableMouse(true)
 settingsFrame:SetMovable(true)
 settingsFrame:RegisterForDrag("LeftButton")
@@ -697,6 +706,13 @@ local settings = {
 			tooltip = "This defines the channel in which you post your LFM message.",
 		},
 		{
+			type = "Textbox",
+			text = "LFG Advertisement Channel:",
+			key = "lfgChannel",
+			width = 125,
+			tooltip = "This defines the channel in which you post your LFG message.",
+		},
+		{
 			text = "Show Spam Groups",
 			key = "enableSpamGroups",
 			tooltip =
@@ -824,6 +840,8 @@ local function CreateSettingsTextBox(parent, id, label, tooltipText, point, dbKe
 		NoxxLFGSettings["supportedChannels"] = "General, Trade, LookingForGroup, LFG, World"
 	elseif NoxxLFGSettings["lfmChannel"] == nil then
 		NoxxLFGSettings["lfmChannel"] = "LookingForGroup"
+	elseif NoxxLFGSettings["lfgChannel"] == nil then
+		NoxxLFGSettings["lfgChannel"] = "LookingForGroup"
 	elseif NoxxLFGSettings[dbKey] == nil then
 		NoxxLFGSettings[dbKey] = ""
 	end
@@ -846,6 +864,9 @@ local function CreateSettingsTextBox(parent, id, label, tooltipText, point, dbKe
 		elseif dbKey == "lfmChannel" then
 			GameTooltip:AddLine("\n\n|cFFFFFFFFYour LFM message will post to: ")
 			GameTooltip:AddLine(headerColor .. NoxxLFGSettings.lfmChannel)
+		elseif dbKey == "lfgChannel" then
+			GameTooltip:AddLine("\n\n|cFFFFFFFFYour LFG message will post to: ")
+			GameTooltip:AddLine(headerColor .. NoxxLFGSettings.lfgChannel)
 		end
 		GameTooltip:Show()
 	end)
@@ -870,6 +891,14 @@ local function CreateSettingsTextBox(parent, id, label, tooltipText, point, dbKe
 			if NoxxLFGSettings.lfmChannel ~= textBox:GetText() then
 				print(NoxxLFGBlueColor ..
 					'NoxxLFG:|r Your LFM messages will now post to: |cFFFFFF00' ..
+					textBox:GetText() .. "|r. You will need to reload your UI for changes to reflect in NoxxLFG.")
+				NoxxLFGSettings[dbKey] = textBox:GetText()
+				ShowReloadConfirmation()
+			end
+		elseif dbKey == "lfgChannel" then
+			if NoxxLFGSettings.lfgChannel ~= textBox:GetText() then
+				print(NoxxLFGBlueColor ..
+					'NoxxLFG:|r Your LFG messages will now post to: |cFFFFFF00' ..
 					textBox:GetText() .. "|r. You will need to reload your UI for changes to reflect in NoxxLFG.")
 				NoxxLFGSettings[dbKey] = textBox:GetText()
 				ShowReloadConfirmation()
@@ -962,34 +991,45 @@ lfmCreationFrame:SetSize(mainFrame:GetWidth() - 15, mainFrame:GetHeight() - 30)
 lfmCreationFrame:SetPoint("TOP", mainFrame, "TOP", 0, -20)
 lfmCreationFrame:Hide()
 
+local lfgCreationFrame = CreateFrame("Frame", "NoxxLFGLFGCreationFrame", mainFrame)
+lfgCreationFrame:SetSize(mainFrame:GetWidth() - 15, mainFrame:GetHeight() - 30)
+lfgCreationFrame:SetPoint("TOP", mainFrame, "TOP", 0, -20)
+lfgCreationFrame:Hide()
+
 local lfmCreationFrameHint = lfmCreationFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 lfmCreationFrameHint:SetPoint("TOPLEFT", lfmCreationFrame, "TOPLEFT", 15, -12)
 lfmCreationFrameHint:SetWidth(mainFrame:GetWidth() - 120)
 lfmCreationFrameHint:SetWordWrap(true)
 lfmCreationFrameHint:SetJustifyH("LEFT")
 
+local lfgCreationFrameHint = lfgCreationFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+lfgCreationFrameHint:SetPoint("TOPLEFT", lfgCreationFrame, "TOPLEFT", 15, -12)
+lfgCreationFrameHint:SetWidth(mainFrame:GetWidth() - 120)
+lfgCreationFrameHint:SetWordWrap(true)
+lfgCreationFrameHint:SetJustifyH("LEFT")
+
 local lfmCreationFrameButton =
 	CreateFrame("Button", "NoxxLFGLFMCreationFrameButton", lfmlfgButtonGroup, "UIPanelButtonTemplate")
 lfmCreationFrameButton:SetPoint("TOPLEFT", lfmlfgButtonGroup, "TOPLEFT", 35, 0)
 lfmCreationFrameButton:SetSize(170, 30)
-lfmCreationFrameButton:SetText("I need more players...")
-
-local lfgCreationFrame = CreateFrame("Frame", "NoxxLFGLFMCreationFrame", mainFrame)
-lfgCreationFrame:SetSize(categoryFrame:GetWidth() - 50, 250)
-lfgCreationFrame:SetPoint("TOP", categoryFrame, "TOP", 0, -355)
-lfgCreationFrame:Hide()
-
-local lfgCreationFrameButton =
-	CreateFrame("Button", "NoxxLFGLFMCreationFrameButton", lfmlfgButtonGroup, "UIPanelButtonTemplate")
-lfgCreationFrameButton:SetPoint("TOPLEFT", lfmlfgButtonGroup, "TOPLEFT", 35, -40)
-lfgCreationFrameButton:SetSize(170, 30)
-lfgCreationFrameButton:SetText("I'm looking for a group...")
-lfgCreationFrameButton:Disable()
+lfmCreationFrameButton:SetText("Start LFM Message")
 
 lfmCreationFrameButton:SetScript("OnClick", function()
 	lfmlfgButtonGroup:Hide()
 	categoryFrame:Hide()
 	lfmCreationFrame:Show()
+end)
+
+local lfgCreationFrameButton =
+	CreateFrame("Button", "NoxxLFGLFMCreationFrameButton", lfmlfgButtonGroup, "UIPanelButtonTemplate")
+lfgCreationFrameButton:SetPoint("TOPLEFT", lfmlfgButtonGroup, "TOPLEFT", 35, -40)
+lfgCreationFrameButton:SetSize(170, 30)
+lfgCreationFrameButton:SetText("Start LFG Message")
+
+lfgCreationFrameButton:SetScript("OnClick", function()
+	lfmlfgButtonGroup:Hide()
+	categoryFrame:Hide()
+	lfgCreationFrame:Show()
 end)
 
 local lfmBackButton = CreateFrame("Button", nil, lfmCreationFrame, "UIPanelButtonTemplate")
@@ -999,6 +1039,17 @@ lfmBackButton:SetText("Back")
 
 lfmBackButton:SetScript("OnClick", function()
 	lfmCreationFrame:Hide()
+	categoryFrame:Show()
+	lfmlfgButtonGroup:Show()
+end)
+
+local lfgBackButton = CreateFrame("Button", nil, lfgCreationFrame, "UIPanelButtonTemplate")
+lfgBackButton:SetSize(50, 30)
+lfgBackButton:SetPoint("TOPLEFT", lfgCreationFrame, "TOPLEFT", 12, -60)
+lfgBackButton:SetText("Back")
+
+lfgBackButton:SetScript("OnClick", function()
+	lfgCreationFrame:Hide()
 	categoryFrame:Show()
 	lfmlfgButtonGroup:Show()
 end)
@@ -1034,6 +1085,11 @@ lfmPostButtonAuto:SetScript("OnLeave", function()
 	GameTooltip:SetScale(1)
 end)
 
+local lfgPostButtonAuto = CreateFrame("Button", nil, lfgCreationFrame, "UIPanelButtonTemplate")
+lfgPostButtonAuto:SetSize(120, 30)
+lfgPostButtonAuto:SetPoint("TOPRIGHT", lfgCreationFrame, "TOPRIGHT", -12, -60)
+lfgPostButtonAuto:SetText("Repeat Post")
+
 local function SendMessage()
 	if lfmCreationMessage and lfmCreationMessage ~= "" then
 		-- SendChatMessage(lfmCreationMessage, "WHISPER", nil, UnitName("player")) DEBUGGING MODE
@@ -1044,8 +1100,8 @@ local function SendMessage()
 		if channelId == 0 or channelString == nil then
 			print(
 				NoxxLFGBlueColor
-				..
-				'NoxxLFG: |rFailure to post message to |cFFFFFF00"' ..
+				.. addonName ..
+				': |rFailure to post message to |cFFFFFF00"' ..
 				NoxxLFGSettings.lfmChannel .. '"|r. Please check the channel name and make sure you\'ve joined it first!'
 			)
 			return
@@ -1057,9 +1113,40 @@ local function SendMessage()
 		else
 			print(
 				NoxxLFGBlueColor
-				..
-				'NoxxLFG: |rUnable to send message to |cFFFFFF00' ..
+				.. addonName ..
+				': |rUnable to send message to |cFFFFFF00' ..
 				NoxxLFGSettings.lfmChannel .. '|r channel! Make sure you\'ve joined the channel first!'
+			)
+		end
+	end
+end
+
+local function SendLFGMessage()
+	if lfgCreationMessage and lfgCreationMessage ~= "" then
+		-- SendChatMessage(lfgCreationMessage, "WHISPER", nil, UnitName("player")) DEBUGGING MODE
+
+		local channelName = NoxxLFGSettings.lfgChannel or "LookingForGroup"
+		local channelId, channelString = GetChannelName(channelName)
+
+		if channelId == 0 or channelString == nil then
+			print(
+				NoxxLFGBlueColor
+				.. addonName ..
+				': |rFailure to post message to |cFFFFFF00"' ..
+				NoxxLFGSettings.lfgChannel .. '"|r. Please check the channel name and make sure you\'ve joined it first!'
+			)
+			return
+		end
+
+		if channelId > 0 then -- LIVE
+			DEFAULT_CHAT_FRAME.editBox:SetText("/" .. channelId .. " " .. lfgCreationMessage)
+			ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)
+		else
+			print(
+				NoxxLFGBlueColor
+				.. addonName ..
+				': |rUnable to send message to |cFFFFFF00' ..
+				NoxxLFGSettings.lfgChannel .. '|r channel! Make sure you\'ve joined the channel first!'
 			)
 		end
 	end
@@ -1075,29 +1162,25 @@ lfmPostButton:SetScript("OnClick", function()
 	SendMessage()
 end)
 
-lfmPostButton:SetScript("OnEnter", function(self)
-	GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
-	GameTooltip:SetScale(0.8)
-	GameTooltip:SetText(
-		"|cFFFFFFFFUsing this posts a message directly to |cFFFFFF00LookingForGroup|r. You can use this button to post every 30 seconds.",
-		nil,
-		nil,
-		nil,
-		nil,
-		true
-	)
-	GameTooltip:Show()
-end)
+local lfgPostButton = CreateFrame("Button", nil, lfgCreationFrame, "UIPanelButtonTemplate")
+lfgPostButton:SetSize(75, 30)
+lfgPostButton:SetPoint("RIGHT", lfgPostButtonAuto, "LEFT", -5, 0)
+lfgPostButton:SetText("Post")
 
-lfmPostButton:SetScript("OnLeave", function()
-	GameTooltip:Hide()
-	GameTooltip:SetScale(1)
+lfgPostButton:SetScript("OnClick", function()
+	PlaySound(808)
+	SendLFGMessage()
 end)
 
 local lfmPostButtonReset = CreateFrame("Button", nil, lfmCreationFrame, "UIPanelButtonTemplate")
 lfmPostButtonReset:SetSize(75, 30)
 lfmPostButtonReset:SetPoint("RIGHT", lfmPostButton, "LEFT", -5, 0)
 lfmPostButtonReset:SetText("Reset")
+
+local lfgPostButtonReset = CreateFrame("Button", nil, lfgCreationFrame, "UIPanelButtonTemplate")
+lfgPostButtonReset:SetSize(75, 30)
+lfgPostButtonReset:SetPoint("RIGHT", lfgPostButton, "LEFT", -5, 0)
+lfgPostButtonReset:SetText("Reset")
 
 local lookingForMoreText = lfmCreationFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightLarge2")
 lookingForMoreText:SetPoint("TOPLEFT", lfmCreationFrame, "TOPLEFT", 70, -66)
@@ -1431,6 +1514,11 @@ previewTextFontString:SetWidth(mainFrame:GetWidth() - 80)
 previewTextFontString:SetWordWrap(true)
 previewTextFontString:SetPoint("TOP", lfmCreationFrame, "TOP", 0, -410)
 
+local previewLFGTextFontString = lfgCreationFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+previewLFGTextFontString:SetWidth(mainFrame:GetWidth() - 80)
+previewLFGTextFontString:SetWordWrap(true)
+previewLFGTextFontString:SetPoint("TOP", lfgCreationFrame, "TOP", 0, -410)
+
 local neededFrame = CreateFrame("Frame", "NoxxLFGLFMNeededFrame", UIParent, "BackdropTemplate")
 neededFrame:SetSize(170, 30)
 neededFrame:SetPoint("LEFT", ChatFrameChannelButton, "LEFT", 30, 32)
@@ -1535,7 +1623,12 @@ local function ResetLFMMessage()
 	lfmPostButtonAuto:SetText("Repeat Post")
 end
 
-local function UpdateMessage(
+local function ResetLFGMessage()
+	postingLFGMessage = false
+	lfgPostButtonAuto:SetText("Repeat Post")
+end
+
+local function UpdateLFMMessage(
 	dungeonRaidText,
 	tankText,
 	dpsText,
@@ -1647,13 +1740,77 @@ local function UpdateMessage(
 		if postingMessage and #roles == 0 and totalRoles > 0 then
 			print(
 				NoxxLFGBlueColor
-				..
-				"NoxxLFG: |cFFFFFF00Your group has been filled according to your set message. |r|rYou will no longer receive reminders to post your message."
+				.. addonName ..
+				": |cFFFFFF00Your group has been filled according to your set message. |r|rYou will no longer receive reminders to post your message."
 			)
 			ResetLFMMessage()
 			CancelTimer()
 			postButtonFrame:Hide()
 			neededFrame:Hide()
+		end
+	end
+end
+
+local function UpdateLFGMessage(
+	dungeonRaidQuestText,
+	extraInfo
+)
+	if previewLFGTextFontString then
+		dungeonRaidQuestText = dungeonRaidQuestText or ""
+
+		local message = ""
+
+		if dungeonRaidQuestText and dungeonRaidQuestText ~= "" then
+			message = "LFG " .. dungeonRaidQuestText
+		end
+
+		local options = {}
+
+		if extraInfo and extraInfo ~= "" then
+			table.insert(options, extraInfo)
+		end
+
+		if #options > 0 and dungeonRaidQuestText ~= "" then
+			message = message .. " - " .. table.concat(options, ", ")
+		end
+
+		local channelName = NoxxLFGSettings.lfgChannel or "LookingForGroup"
+		local channelId, channelString = GetChannelName(channelName)
+		local _, class = UnitClass("player")
+
+		if #message < 125 then
+			if channelId > 0 and channelString then
+				previewTextFontString:SetText("|cFFFEC1C0[" ..
+					channelId ..
+					". " .. channelString .. "] [|c" .. classColor[class] .. UnitName("player") .. "|r]: " .. message)
+			else
+				previewTextFontString:SetText(
+					"|cFFFF0000Message will not post! (Bad channel name - please set a valid channel in the settings)")
+			end
+		else
+			previewTextFontString:SetText("|cFFFF0000Message too long!")
+		end
+
+		if message ~= "" then
+			lfgCreationMessage = message
+			lfgPostButtonAuto:Enable()
+			lfgPostButton:Enable()
+		else
+			lfgPostButtonAuto:Disable()
+			lfgPostButton:Disable()
+			ResetLFGMessage()
+			CancelLFGTimer()
+		end
+
+		if postingLFGMessage then
+			print(
+				NoxxLFGBlueColor
+				.. addonName ..
+				": |cFFFFFF00Your group has been filled according to your set message. |r|rYou will no longer receive reminders to post your message."
+			)
+			ResetLFGMessage()
+			CancelLFGTimer()
+			postButtonFrame:Hide()
 		end
 	end
 end
@@ -1740,15 +1897,33 @@ extraInfoTextBox:SetScript("OnTabPressed", function()
 	dungeonRaidTextBox:SetFocus()
 end)
 
+-- LFG Frame Text Boxes
+
+local dungeonRaidQuestTextBox = CreateTextBox(
+	lfgCreationFrame,
+	"Dungeon/Raid/Quest Name: " .. headerColor .. "(required)|r",
+	"",
+	150,
+	20,
+	20,
+	-120,
+	false
+)
+
+local extraInfoLFGTextBox =
+	CreateTextBox(lfgCreationFrame, "|cFFEDEDEDExtra Info (Incursion Spam, etc.)", "", 150, 20, 20, -370, false)
+
 local function ClearTextBoxFocus()
 	tankTextBox:ClearFocus()
 	dpsTextBox:ClearFocus()
 	healerTextBox:ClearFocus()
 	dungeonRaidTextBox:ClearFocus()
+	dungeonRaidQuestTextBox:ClearFocus()
 	tankPreferredTextBox:ClearFocus()
 	dpsPreferredTextBox:ClearFocus()
 	healerPreferredTextBox:ClearFocus()
 	extraInfoTextBox:ClearFocus()
+	extraInfoLFGTextBox:ClearFocus()
 end
 
 lfmPostButtonReset:SetScript("OnClick", function()
@@ -1765,7 +1940,7 @@ lfmPostButtonReset:SetScript("OnClick", function()
 		bringConsumesCheckbox:SetChecked(false)
 		mustKnowFightsCheckbox:SetChecked(false)
 		spamRunCheckbox:SetChecked(false)
-		UpdateMessage(
+		UpdateLFMMessage(
 			dungeonRaidTextBox:GetText(),
 			tankTextBox:GetText(),
 			dpsTextBox:GetText(),
@@ -1774,6 +1949,19 @@ lfmPostButtonReset:SetScript("OnClick", function()
 			dpsPreferredTextBox:GetText(),
 			healerPreferredTextBox:GetText(),
 			extraInfoTextBox:GetText()
+		)
+		ClearTextBoxFocus()
+	end
+end)
+
+lfgPostButtonReset:SetScript("OnClick", function()
+	if not postingLFGMessage then
+		PlaySound(808)
+		dungeonRaidQuestTextBox:SetText("")
+		extraInfoLFGTextBox:SetText("")
+		UpdateLFGMessage(
+			dungeonRaidQuestTextBox:GetText(),
+			extraInfoLFGTextBox:GetText()
 		)
 		ClearTextBoxFocus()
 	end
@@ -1788,12 +1976,19 @@ postButtonFrameMessage:SetPoint("TOP", postButtonFrame, "TOP", 0, -35)
 postButtonFrameMessage:SetWidth(postButtonFrame:GetWidth() - 50)
 postButtonFrameMessage:SetWordWrap(true)
 
-local function PostButton()
+local function PostButton(string)
 	PlaySound(3081)
-	postButtonFrameMessage:SetText("|cFFFEC1C0" .. lfmCreationMessage)
-	visiblePopupsCount = visiblePopupsCount + 1
-	postButtonFrame:Show()
-	messageTimer:Cancel()
+	if postingMessage then
+		postButtonFrameMessage:SetText("|cFFFEC1C0" .. lfmCreationMessage)
+		visiblePopupsCount = visiblePopupsCount + 1
+		postButtonFrame:Show()
+		messageTimer:Cancel()
+	elseif postingLFGMessage then
+		postButtonFrameMessage:SetText("|cFFFEC1C0" .. lfgCreationMessage)
+		visiblePopupsCount = visiblePopupsCount + 1
+		postButtonFrame:Show()
+		LFGMessageTimer:Cancel()
+	end
 end
 
 local postButton = CreateFrame("Button", "NoxxLFGLFMReminderPostButton", postButtonFrame, "UIPanelButtonTemplate")
@@ -1803,7 +1998,11 @@ postButton:SetPoint("BOTTOMLEFT", postButtonFrame, "BOTTOMLEFT", 100, 15)
 postButton:SetScript("OnClick", function()
 	PlaySound(808)
 	SendMessage()
-	messageTimer = C_Timer.NewTicker(postingMessageTimer, PostButton)
+	if postingMessage then
+		messageTimer = C_Timer.NewTicker(postingMessageTimer, PostButton)
+	elseif postingLFGMessage then
+		LFGMessageTimer = C_Timer.NewTicker(postingMessageTimer, PostButton)
+	end
 	postButtonFrame:Hide()
 	visiblePopupsCount = visiblePopupsCount - 1
 end)
@@ -1814,15 +2013,21 @@ cancelButton:SetSize(125, 30)
 cancelButton:SetPoint("BOTTOMRIGHT", postButtonFrame, "BOTTOMRIGHT", -100, 15)
 cancelButton:SetScript("OnClick", function()
 	PlaySound(808)
-	print(NoxxLFGBlueColor .. "NoxxLFG: |rYou will no longer receive reminders to post your message.")
-	CancelTimer()
-	ResetLFMMessage()
+	print(NoxxLFGBlueColor .. addonName .. ": |rYou will no longer receive reminders to post your message.")
+	if postingMessage then
+		CancelTimer()
+		ResetLFMMessage()
+	elseif postingLFGMessage then
+		CancelLFGTimer()
+		ResetLFGMessage()
+	end
 	postButtonFrame:Hide()
 	neededFrame:Hide()
 	visiblePopupsCount = visiblePopupsCount - 1
 end)
 
 lfmCreationFrame:SetScript("OnMouseDown", ClearTextBoxFocus)
+lfgCreationFrame:SetScript("OnMouseDown", ClearTextBoxFocus)
 
 lfmPostButtonAuto:SetScript("OnClick", function()
 	PlaySound(808)
@@ -1859,6 +2064,28 @@ lfmPostButtonAuto:SetScript("OnClick", function()
 	end
 end)
 
+lfgPostButtonAuto:SetScript("OnClick", function()
+	PlaySound(808)
+	if lfgCreationMessage and lfgCreationMessage ~= "" then
+		ClearTextBoxFocus()
+		if not postingLFGMessage then
+			SendLFGMessage()
+			lfgPostButtonAuto:SetText("Reminding in 30s")
+			postingLFGMessage = true
+			LFGMessageTimer = C_Timer.NewTicker(postingMessageTimer, PostButton)
+			mainFrame:Hide()
+		else
+			postingLFGMessage = false
+			lfgPostButtonAuto:SetText("Repeat Post")
+			CancelLFGTimer()
+		end
+	else
+		if postingLFGMessage then
+			ResetLFGMessage()
+		end
+	end
+end)
+
 local function CheckForRolesBeforeStarting()
 	local tankCount = tonumber(tankTextBox:GetText()) or 0
 	local healerCount = tonumber(healerTextBox:GetText()) or 0
@@ -1870,7 +2097,7 @@ end
 local function setupUpdateMessageHandler(uiElements)
 	local function updateHandler()
 		CheckForRolesBeforeStarting()
-		UpdateMessage(
+		UpdateLFMMessage(
 			dungeonRaidTextBox:GetText(),
 			tankTextBox:GetText(),
 			dpsTextBox:GetText(),
@@ -1879,6 +2106,10 @@ local function setupUpdateMessageHandler(uiElements)
 			dpsPreferredTextBox:GetText(),
 			healerPreferredTextBox:GetText(),
 			extraInfoTextBox:GetText()
+		)
+		UpdateLFGMessage(
+			dungeonRaidQuestTextBox:GetText(),
+			extraInfoLFGTextBox:GetText()
 		)
 	end
 
@@ -1896,10 +2127,12 @@ local uiElementsToUpdate = {
 	dpsTextBox,
 	healerTextBox,
 	dungeonRaidTextBox,
+	dungeonRaidQuestTextBox,
 	tankPreferredTextBox,
 	dpsPreferredTextBox,
 	healerPreferredTextBox,
 	extraInfoTextBox,
+	extraInfoLFGTextBox,
 	bringConsumesCheckbox,
 	mustKnowFightsCheckbox,
 	spamRunCheckbox,
@@ -1970,7 +2203,7 @@ local function ShowRoleSelectionPopup(playerName, tankCount, healerCount, dpsCou
 			frame:Hide()
 			visiblePopupsCount = visiblePopupsCount - 1
 		end
-		UpdateMessage(
+		UpdateLFMMessage(
 			dungeonRaidTextBox:GetText(),
 			tankTextBox:GetText(),
 			dpsTextBox:GetText(),
@@ -1999,7 +2232,7 @@ local function ShowRoleSelectionPopup(playerName, tankCount, healerCount, dpsCou
 			frame:Hide()
 			visiblePopupsCount = visiblePopupsCount - 1
 		end
-		UpdateMessage(
+		UpdateLFMMessage(
 			dungeonRaidTextBox:GetText(),
 			tankTextBox:GetText(),
 			dpsTextBox:GetText(),
@@ -2028,7 +2261,7 @@ local function ShowRoleSelectionPopup(playerName, tankCount, healerCount, dpsCou
 			frame:Hide()
 			visiblePopupsCount = visiblePopupsCount - 1
 		end
-		UpdateMessage(
+		UpdateLFMMessage(
 			dungeonRaidTextBox:GetText(),
 			tankTextBox:GetText(),
 			dpsTextBox:GetText(),
@@ -2072,13 +2305,18 @@ local function OnSystemMessage(self, event, message)
 	local disbandedText = "Your group has been disbanded."
 
 	local disbanded = message:match(leaveText) or message:match(disbandedText)
-	if disbanded and postingMessage and startedWithRoles then
+	if disbanded and ((postingMessage and startedWithRoles) or postingLFGMessage) then
 		print(
 			NoxxLFGBlueColor
-			.. "NoxxLFG: |cFFFFFF00Your group has been disbanded. |r|rYou will no longer receive reminders to post your message."
+			.. addonName .. ": |cFFFFFF00Your group has been disbanded. |r|rYou will no longer receive reminders to post your message."
 		)
-		ResetLFMMessage()
-		CancelTimer()
+		if postingMessage then
+			ResetLFMMessage()
+			CancelTimer()
+		elseif postingLFGMessage then
+			ResetLFGMessage()
+			CancelLFGTimer()
+		end
 	end
 
 	if not UnitAffectingCombat("player") then
@@ -2147,7 +2385,7 @@ dungeonCategory:SetScript("OnMouseUp", function()
 		mainFrame.title:SetText(
 			"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t "
 			.. NoxxLFGBlueColor
-			.. "NoxxLFG v"
+			.. addonName .. " v"
 			.. versionNum
 			.. "|r (Searching for Dungeons)"
 		)
@@ -2173,7 +2411,7 @@ raidCategory:SetScript("OnMouseUp", function()
 		mainFrame.title:SetText(
 			"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t "
 			.. NoxxLFGBlueColor
-			.. "NoxxLFG v"
+			.. addonName .. " v"
 			.. versionNum
 			.. "|r (Searching for Raids)"
 		)
@@ -2199,7 +2437,7 @@ travelCategory:SetScript("OnMouseUp", function()
 		mainFrame.title:SetText(
 			"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t "
 			.. NoxxLFGBlueColor
-			.. "NoxxLFG v"
+			.. addonName .. " v"
 			.. versionNum
 			.. "|r (Searching for Travel)"
 		)
@@ -2225,7 +2463,7 @@ servicesCategory:SetScript("OnMouseUp", function()
 		mainFrame.title:SetText(
 			"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t "
 			.. NoxxLFGBlueColor
-			.. "NoxxLFG v"
+			.. addonName .. " v"
 			.. versionNum
 			.. "|r (Searching for Services)"
 		)
@@ -2251,7 +2489,7 @@ eventsCategory:SetScript("OnMouseUp", function()
 		mainFrame.title:SetText(
 			"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t "
 			.. NoxxLFGBlueColor
-			.. "NoxxLFG v"
+			.. addonName .. " v"
 			.. versionNum
 			.. "|r (Searching for Events & PvP)"
 		)
@@ -3999,7 +4237,7 @@ categorySearchBackButton:SetScript("OnClick", function()
 	pausePlayButton:Hide()
 	topHintText:SetText(NoxxLFGBlueColor .. "Left-click:|cFFFFFFFF Start Whisper|r")
 	mainFrame.title:SetText(
-		"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t " .. NoxxLFGBlueColor .. "NoxxLFG v" .. versionNum .. "|r"
+		"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t " .. NoxxLFGBlueColor .. addonName .. " v" .. versionNum .. "|r"
 	)
 	PlaySound(808)
 end)
@@ -4009,6 +4247,8 @@ local function OnEvent(self, event, arg1)
 		CreateSettingsUI(settingsFrame)
 		CheckIfPaused()
 		local channelId, channelString = GetChannelName(NoxxLFGSettings.lfmChannel)
+		local channelIdLFG, channelStringLFG = GetChannelName(NoxxLFGSettings.lfgChannel)
+
 		if channelId and channelId > 0 and channelString then
 			lfmCreationFrameHint:SetText(
 				"Use this tool to construct a message and post to |cFFFFFFFF" ..
@@ -4020,6 +4260,19 @@ local function OnEvent(self, event, arg1)
 				"|cFFFF0000The channel you have set for this function is invalid! Please set a valid channel in the settings or join the channel you've set!"
 			)
 		end
+
+		if channelIdLFG and channelIdLFG > 0 and channelStringLFG then
+			lfgCreationFrameHint:SetText(
+				"Use this tool to construct a message and post to |cFFFFFFFF" ..
+				channelStringLFG ..
+				"|r. If posting as repeat, once you join a party, the repeated reminders to post your LFG message will cease."
+			)
+		else
+			lfgCreationFrameHint:SetText(
+				"|cFFFF0000The channel you have set for this function is invalid! Please set a valid channel in the settings or join the channel you've set!"
+			)
+		end
+
 		local _, currentFaction = UnitFactionGroup("player")
 
 		if NoxxLFGListings.dungeonGroups then
@@ -4106,6 +4359,11 @@ movementFrame:SetScript("OnEvent", function(self, event)
 end)
 
 function ToggleNoxxLFGWindowBind(openDungeons)
+	if openDungeons then
+		openDungeons = true
+	end
+
+	PlaySound(808)
 	if not mainFrame:IsShown() then
 		mainFrame:Show()
 		if openDungeons then
@@ -4117,11 +4375,10 @@ function ToggleNoxxLFGWindowBind(openDungeons)
 			mainFrame.title:SetText(
 				"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t "
 				.. NoxxLFGBlueColor
-				.. "NoxxLFG v"
+				.. addonName .. " v"
 				.. versionNum
 				.. "|r (Searching for Dungeons)"
 			)
-			PlaySound(808)
 		end
 	else
 		mainFrame:Hide()
@@ -4147,7 +4404,7 @@ local miniButton = LibStub("LibDataBroker-1.1"):NewDataObject("NoxxLFG", {
 			return
 		end
 
-		tooltip:AddLine(NoxxLFGBlueColor .. "NoxxLFG\n\nLeft-click: |rOpen NoxxLFG", nil, nil, nil, nil)
+		tooltip:AddLine(NoxxLFGBlueColor .. addonName .. "\n\nLeft-click: |rOpen " .. addonName, nil, nil, nil, nil)
 	end,
 })
 
