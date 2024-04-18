@@ -1,0 +1,5 @@
+<Bindings>
+  <Binding name="Toggle NoxxLFG Window" description="Opens or Closes NoxxLFG" header="NoxxLFGBind" category="NoxxLFG">
+    ToggleNoxxLFGWindowBind()
+  </Binding>
+</Bindings>
