@@ -1792,15 +1792,15 @@ local function UpdateLFGMessage(
 
 		if #message < 125 then
 			if channelId > 0 and channelString then
-				previewTextFontString:SetText("|cFFFEC1C0[" ..
+				previewLFGTextFontString:SetText("|cFFFEC1C0[" ..
 					channelId ..
 					". " .. channelString .. "] [|c" .. classColor[class] .. UnitName("player") .. "|r]: " .. message)
 			else
-				previewTextFontString:SetText(
+				previewLFGTextFontString:SetText(
 					"|cFFFF0000Message will not post! (Bad channel name - please set a valid channel in the settings)")
 			end
 		else
-			previewTextFontString:SetText("|cFFFF0000Message too long!")
+			previewLFGTextFontString:SetText("|cFFFF0000Message too long!")
 		end
 
 		if message ~= "" then
