@@ -2,7 +2,7 @@
 NoxxLFG = NoxxLFG or {}
 
 local addonName = "NoxxLFG"
-local versionNum = "1.3.2"
+local versionNum = "1.3.3"
 local headerColor = "|cFFFCC453"
 local LibDD = LibStub:GetLibrary("LibUIDropDownMenu-4.0")
 local shortMessageLength = 35
@@ -869,7 +869,8 @@ local function CreateSettingsTextBox(parent, id, label, tooltipText, point, dbKe
 		if dbKey == "lfmChannel" then
 			if NoxxLFGSettings.lfmChannel ~= textBox:GetText() then
 				print(NoxxLFGBlueColor ..
-					'NoxxLFG:|r Your LFM messages will now post to: |cFFFFFF00' .. textBox:GetText() .. "|r. You will need to reload your UI for changes to reflect in NoxxLFG.")
+					'NoxxLFG:|r Your LFM messages will now post to: |cFFFFFF00' ..
+					textBox:GetText() .. "|r. You will need to reload your UI for changes to reflect in NoxxLFG.")
 				NoxxLFGSettings[dbKey] = textBox:GetText()
 				ShowReloadConfirmation()
 			end
@@ -1626,7 +1627,7 @@ local function UpdateMessage(
 					". " .. channelString .. "] [|c" .. classColor[class] .. UnitName("player") .. "|r]: " .. message)
 			else
 				previewTextFontString:SetText(
-				"|cFFFF0000Message will not post! (Bad channel name - please set a valid channel in the settings)")
+					"|cFFFF0000Message will not post! (Bad channel name - please set a valid channel in the settings)")
 			end
 		else
 			previewTextFontString:SetText("|cFFFF0000Message too long!")
@@ -4104,9 +4105,24 @@ movementFrame:SetScript("OnEvent", function(self, event)
 	end
 end)
 
-function ToggleNoxxLFGWindowBind()
+function ToggleNoxxLFGWindowBind(openDungeons)
 	if not mainFrame:IsShown() then
 		mainFrame:Show()
+		if openDungeons then
+			categoryFrame:Hide()
+			lfmlfgButtonGroup:Hide()
+			lfmCreationFrame:Hide()
+			categorySearchFrameDungeons:Show()
+			categorySearchFrameChildDungeons:Show()
+			mainFrame.title:SetText(
+				"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t "
+				.. NoxxLFGBlueColor
+				.. "NoxxLFG v"
+				.. versionNum
+				.. "|r (Searching for Dungeons)"
+			)
+			PlaySound(808)
+		end
 	else
 		mainFrame:Hide()
 	end
