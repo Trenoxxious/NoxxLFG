@@ -1753,10 +1753,12 @@ end
 
 local function UpdateLFGMessage(
 	dungeonRaidQuestText,
+	playerRole,
 	extraInfo
 )
 	if previewLFGTextFontString then
 		dungeonRaidQuestText = dungeonRaidQuestText or ""
+		playerRole = playerRole or ""
 
 		local message = ""
 
@@ -1766,12 +1768,22 @@ local function UpdateLFGMessage(
 
 		local options = {}
 
+		if playerRole and playerRole ~= "" then
+			table.insert(options, playerRole)
+		end
+
 		if extraInfo and extraInfo ~= "" then
 			table.insert(options, extraInfo)
 		end
 
-		if #options > 0 and dungeonRaidQuestText ~= "" then
-			message = message .. " - " .. table.concat(options, ", ")
+		if #options > 0 then
+			if playerRole ~= "" then
+				message = playerRole .. message
+			end
+
+			if dungeonRaidQuestText ~= "" then
+				message = message .. " - " .. table.concat(options, ", ")
+			end
 		end
 
 		local channelName = NoxxLFGSettings.lfgChannel or "LookingForGroup"
@@ -1842,6 +1854,8 @@ local function CreateTextBox(parent, labelText, defaultText, width, height, xOff
 	return textBox
 end
 
+-- LFM Frame Text Boxes
+
 local tankTextBox = CreateTextBox(lfmCreationFrame, "# |cFF34b1ebTanks|r Needed:", "", 50, 20, 20, -170, true)
 local dpsTextBox = CreateTextBox(lfmCreationFrame, "# |cFFed5351DPS|r Needed:", "", 50, 20, 160, -170, true)
 local healerTextBox = CreateTextBox(lfmCreationFrame, "# |cFF95e879Healers|r Needed:", "", 50, 20, 300, -170, true)
@@ -1910,6 +1924,9 @@ local dungeonRaidQuestTextBox = CreateTextBox(
 	false
 )
 
+local playerRoleTextBox =
+	CreateTextBox(lfgCreationFrame, "What is your role?", "", 50, 20, 20, -170, false)
+
 local extraInfoLFGTextBox =
 	CreateTextBox(lfgCreationFrame, "|cFFEDEDEDExtra Info (Incursion Spam, etc.)", "", 150, 20, 20, -370, false)
 
@@ -1958,9 +1975,11 @@ lfgPostButtonReset:SetScript("OnClick", function()
 	if not postingLFGMessage then
 		PlaySound(808)
 		dungeonRaidQuestTextBox:SetText("")
+		playerRoleTextBox:SetText("")
 		extraInfoLFGTextBox:SetText("")
 		UpdateLFGMessage(
 			dungeonRaidQuestTextBox:GetText(),
+			playerRoleTextBox:GetText(),
 			extraInfoLFGTextBox:GetText()
 		)
 		ClearTextBoxFocus()
@@ -2109,6 +2128,7 @@ local function setupUpdateMessageHandler(uiElements)
 		)
 		UpdateLFGMessage(
 			dungeonRaidQuestTextBox:GetText(),
+			playerRoleTextBox:GetText(),
 			extraInfoLFGTextBox:GetText()
 		)
 	end
@@ -2128,6 +2148,7 @@ local uiElementsToUpdate = {
 	healerTextBox,
 	dungeonRaidTextBox,
 	dungeonRaidQuestTextBox,
+	playerRoleTextBox,
 	tankPreferredTextBox,
 	dpsPreferredTextBox,
 	healerPreferredTextBox,
@@ -3959,6 +3980,7 @@ local function eventHandler(self, event, ...)
 			end
 
 			local trimmedChannels = NoxxLFGSettings["supportedChannels"]:match("^%s*(.-)%s*$")
+
 			if trimmedChannels == "" then
 				return false
 			end
@@ -3967,10 +3989,11 @@ local function eventHandler(self, event, ...)
 
 			local supportedKeywords = splitString(NoxxLFGSettings["supportedChannels"], ",")
 
+			--TODO Get Yell and Say to also work at all times, in addition to the supportedChannels setting
 			for _, keyword in ipairs(supportedKeywords) do
 				local lowerKeyword = string.lower(keyword)
 
-				if string.find(lowerChannelName, lowerKeyword) then
+				if string.find(lowerChannelName, lowerKeyword) or lowerChannelName == "yell" or lowerChannelName == "say" then
 					return true
 				end
 			end

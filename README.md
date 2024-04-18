@@ -1,4 +1,4 @@
-# Official Public Repository for NoxxLFG
+# Official Repository for NoxxLFG
 <sup>Addon by Noxxious</sup>
 
 Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
@@ -10,6 +10,7 @@ Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 **v1.4.0 Updates**
 * LFG Tool now available. Construct simple LFG requests and post to your set channel (or LookingForGroup by default) every 30 seconds as normal.
 * Ragefire Chasm color changed slightly.
+* Yell and Say are now valid channels when NoxxLFG parses messages. This is extra and does not need to be added to the settings.
 * UI text updates.
 
 **v1.4.0 TODO/WIP**
