@@ -125,7 +125,7 @@ local dungeons = {
 	{
 		name = "Ragefire Chasm",
 		aliases = { "RFC", "Ragefire Chasm", "Ragefire", "Rage Fire", "Rage Fire Chasm", "Chasm" },
-		color = "FFF09292",
+		color = "FFDD7C7C",
 		checked = true,
 	},
 	{
@@ -2301,11 +2301,15 @@ end
 
 local function OnSystemMessage(self, event, message)
 	local joinPattern = "(.+) joins the party."
+	local joinedGroup = "You join a group." or "You join a raid group."
 	local leaveText = "You leave the group."
+	local removedText = "You have been removed from the group."
 	local disbandedText = "Your group has been disbanded."
 
-	local disbanded = message:match(leaveText) or message:match(disbandedText)
-	if disbanded and ((postingMessage and startedWithRoles) or postingLFGMessage) then
+	local disbanded = message:match(leaveText) or message:match(removedText) or message:match(disbandedText)
+	local officiallyJoined = message:match(joinedGroup)
+
+	if (disbanded and ((postingMessage and startedWithRoles) or postingLFGMessage)) or (officiallyJoined and postingLFGMessage) then
 		print(
 			NoxxLFGBlueColor
 			.. addonName .. ": |cFFFFFF00Your group has been disbanded. |r|rYou will no longer receive reminders to post your message."
