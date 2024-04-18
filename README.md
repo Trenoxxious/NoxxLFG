@@ -1,5 +1,5 @@
 # Official Repository for NoxxLFG
-by Noxxious
+<sup>by Noxxious</sup>
 
 Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 
