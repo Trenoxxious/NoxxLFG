@@ -8,6 +8,7 @@ local LibDD = LibStub:GetLibrary("LibUIDropDownMenu-4.0")
 local shortMessageLength = 35
 local hoveredCategory = false
 local lfmCreationMessage = ""
+local lfgCreationMessage = ""
 local postingMessage = false
 local triedToShowPopup = false
 local triedToShowPlayerNames = {}
