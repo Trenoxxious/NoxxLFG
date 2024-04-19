@@ -1239,11 +1239,12 @@ postAGroupText:SetText(headerColor .. "Post a Group Advertisement:")
 
 postAGroupText:SetScript("OnEnter", function(self)
 	GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
-	GameTooltip:SetText("Posting to: |cFFFFFFFF" .. NoxxLFGSettings.lfmChannel)
+	GameTooltip:SetText("LFM Messages Post to: |cFFFFFFFF" .. NoxxLFGSettings.lfmChannel)
+	GameTooltip:AddLine("LFG Messages Post to: |cFFFFFFFF" .. NoxxLFGSettings.lfgChannel)
 	GameTooltip:Show()
 end)
 
-postAGroupText:SetScript("OnLeave", function(self)
+postAGroupText:SetScript("OnLeave", function()
 	GameTooltip:Hide()
 end)
 
@@ -1784,8 +1785,10 @@ local function UpdateLFMMessage(
 
 		if message ~= "" then
 			lfmCreationMessage = message
-			lfmPostButtonAuto:Enable()
-			lfmPostButton:Enable()
+			if not postingLFGMessage then
+				lfmPostButtonAuto:Enable()
+				lfmPostButton:Enable()
+			end
 		else
 			lfmPostButtonAuto:Disable()
 			lfmPostButton:Disable()
@@ -1798,7 +1801,7 @@ local function UpdateLFMMessage(
 				NoxxLFGBlueColor
 				.. addonName
 				..
-				": |cFFFFFF00Your group has been filled according to your set message. |r|rYou will no longer receive reminders to post your message."
+				": |cFFFFFF00Posting canceled. |r|rYou will no longer receive reminders to post your message."
 			)
 			ResetLFMMessage()
 			CancelTimer()
@@ -1855,8 +1858,10 @@ local function UpdateLFGMessage(dungeonRaidQuestText, playerRole, extraInfo)
 
 		if message ~= "" then
 			lfgCreationMessage = message
-			lfgPostButtonAuto:Enable()
-			lfgPostButton:Enable()
+			if not postingMessage then
+				lfgPostButtonAuto:Enable()
+				lfgPostButton:Enable()
+			end
 		else
 			lfgPostButtonAuto:Disable()
 			lfgPostButton:Disable()
@@ -1869,7 +1874,7 @@ local function UpdateLFGMessage(dungeonRaidQuestText, playerRole, extraInfo)
 				NoxxLFGBlueColor
 				.. addonName
 				..
-				": |cFFFFFF00Your group has been filled according to your set message. |r|rYou will no longer receive reminders to post your message."
+				": |cFFFFFF00Posting canceled. |r|rYou will no longer receive reminders to post your message."
 			)
 			ResetLFGMessage()
 			CancelLFGTimer()
