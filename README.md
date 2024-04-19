@@ -12,6 +12,7 @@ Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 * Ragefire Chasm color changed slightly.
 * Yell and Say are now valid channels when NoxxLFG parses messages. This is extra and does not need to be added to the settings.
 * UI text updates.
+* Updated valid parses for Nightmare Incursions.
 
 **v1.4.0 TODO/WIP**
 * **WIP:** More information/LFG message details to fill out as optional fields.
