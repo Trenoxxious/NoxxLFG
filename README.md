@@ -1,5 +1,5 @@
 # Official Repository for NoxxLFG
-<sup>Addon by Noxxious</sup>
+<sup>World of Warcraft: Season of Discovery Addon by Noxxious</sup>
 
 Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 
