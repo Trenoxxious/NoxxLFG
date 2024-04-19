@@ -8,14 +8,16 @@ Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 
 #### Working/Testing Version Updates
 **v1.4.0 Updates**
-* LFG Tool now available. Construct simple LFG requests and post to your set channel (or LookingForGroup by default) every 30 seconds as normal.
+* The LFG Tool (message constructor) is now available. Construct simple LFG requests and post to your set channel (or LookingForGroup by default) every 30 seconds as normal.
 * Ragefire Chasm color changed slightly.
 * Yell and Say are now valid channels when NoxxLFG parses messages. This is extra and does not need to be added to the settings.
 * UI text updates.
-* Updated valid parses for Nightmare Incursions.
+* Addition of valid parses for Nightmare Incursions.
+* Introduction of a proper debug mode using the "/nlfgdebug" command. Using this command prevents the sending of global messages and instead whispers yourself with your message, as well as displaying various other information.
 
 **v1.4.0 TODO/WIP**
 * **WIP:** More information/LFG message details to fill out as optional fields.
+* **TODO:** Support the selection/linking of quests in the LFG Tool.
 * **TODO:** Role filtering in Dungeons/Raids/Events & PvP categories.
 * **TODO:** Ability to shift-click and link quests to your LFG message.
 

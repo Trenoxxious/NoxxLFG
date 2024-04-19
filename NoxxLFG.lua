@@ -72,6 +72,10 @@ if not NoxxLFGListings.raidGroups then
 	NoxxLFGListings.raidGroups = {}
 end
 
+if not NoxxLFGSettings.nlfgdebugmode then
+	NoxxLFGSettings.nlfgdebugmode = false
+end
+
 local travelGroups = {}
 local servicesGroups = {}
 local eventsGroups = {}
@@ -718,14 +722,16 @@ local settings = {
 		{
 			text = "Show Spam Groups",
 			key = "enableSpamGroups",
-			tooltip = 'Having this enabled will display "Multi-run" or "Spam" groups in the |cFFFFFFFFDungeons|r category.',
+			tooltip =
+			'Having this enabled will display "Multi-run" or "Spam" groups in the |cFFFFFFFFDungeons|r category.',
 		},
 	},
 	["Performance"] = {
 		{
 			text = "Update While Only In-Use",
 			key = "enableUpdateInUse",
-			tooltip = "This will only update your |cFFFFFFFFNoxxLFG list|r while you have the relevant page showing.\n\n|cFFFFFF00Disabling this may cause performance hitches based on your realm population. Looking good unfortunately comes with its cost.",
+			tooltip =
+			"This will only update your |cFFFFFFFFNoxxLFG list|r while you have the relevant page showing.\n\n|cFFFFFF00Disabling this may cause performance hitches based on your realm population. Looking good unfortunately comes with its cost.",
 		},
 	},
 }
@@ -892,9 +898,9 @@ local function CreateSettingsTextBox(parent, id, label, tooltipText, point, dbKe
 			if NoxxLFGSettings.lfmChannel ~= textBox:GetText() then
 				print(
 					NoxxLFGBlueColor
-						.. "NoxxLFG:|r Your LFM messages will now post to: |cFFFFFF00"
-						.. textBox:GetText()
-						.. "|r. You will need to reload your UI for changes to reflect in NoxxLFG."
+					.. "NoxxLFG:|r Your LFM messages will now post to: |cFFFFFF00"
+					.. textBox:GetText()
+					.. "|r. You will need to reload your UI for changes to reflect in NoxxLFG."
 				)
 				NoxxLFGSettings[dbKey] = textBox:GetText()
 				ShowReloadConfirmation()
@@ -903,9 +909,9 @@ local function CreateSettingsTextBox(parent, id, label, tooltipText, point, dbKe
 			if NoxxLFGSettings.lfgChannel ~= textBox:GetText() then
 				print(
 					NoxxLFGBlueColor
-						.. "NoxxLFG:|r Your LFG messages will now post to: |cFFFFFF00"
-						.. textBox:GetText()
-						.. "|r. You will need to reload your UI for changes to reflect in NoxxLFG."
+					.. "NoxxLFG:|r Your LFG messages will now post to: |cFFFFFF00"
+					.. textBox:GetText()
+					.. "|r. You will need to reload your UI for changes to reflect in NoxxLFG."
 				)
 				NoxxLFGSettings[dbKey] = textBox:GetText()
 				ShowReloadConfirmation()
@@ -1071,12 +1077,13 @@ lfmPostButtonAuto:SetScript("OnEnter", function(self)
 	GameTooltip:SetScale(0.8)
 	GameTooltip:SetText(
 		"|cFFFFFFFFUsing this option enables "
-			.. NoxxLFGBlueColor
-			.. "Dynamic Message Updating|r.\n\n"
-			.. NoxxLFGBlueColor
-			.. 'What is Dynamic Message Updating?|r\nIf you started posting your message needing a DPS, Tank or Healer, as you fill your group while this message is using "repeat post," you will be asked what role the person you invited/joins the party fills. It will automatically update your message for you based on your role selection.\n\nOnce the number of Tanks, DPS and Healers reach zero (0), reminders will stop popping up.\n\nA reminder will pop-up every 30 seconds until you cancel it by clicking this button again or your group is filled by using '
-			.. NoxxLFGBlueColor
-			.. "Dynamic Message Updating|r.",
+		.. NoxxLFGBlueColor
+		.. "Dynamic Message Updating|r.\n\n"
+		.. NoxxLFGBlueColor
+		..
+		'What is Dynamic Message Updating?|r\nIf you started posting your message needing a DPS, Tank or Healer, as you fill your group while this message is using "repeat post," you will be asked what role the person you invited/joins the party fills. It will automatically update your message for you based on your role selection.\n\nOnce the number of Tanks, DPS and Healers reach zero (0), reminders will stop popping up.\n\nA reminder will pop-up every 30 seconds until you cancel it by clicking this button again or your group is filled by using '
+		.. NoxxLFGBlueColor
+		.. "Dynamic Message Updating|r.",
 		nil,
 		nil,
 		nil,
@@ -1104,25 +1111,39 @@ local function SendMessage()
 		if channelId == 0 or channelString == nil then
 			print(
 				NoxxLFGBlueColor
-					.. addonName
-					.. ': |rFailure to post message to |cFFFFFF00"'
-					.. NoxxLFGSettings.lfmChannel
-					.. "\"|r. Please check the channel name and make sure you've joined it first!"
+				.. addonName
+				.. ': |rFailure to post message to |cFFFFFF00"'
+				.. NoxxLFGSettings.lfmChannel
+				.. "\"|r. Please check the channel name and make sure you've joined it first!"
 			)
 			return
 		end
 
 		if channelId > 0 then -- LIVE
-			-- DEFAULT_CHAT_FRAME.editBox:SetText("/" .. channelId .. " " .. lfmCreationMessage)
-			-- ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)
-			SendChatMessage(lfmCreationMessage, "WHISPER", nil, UnitName("player")) --DEBUGGING MODE
+			if not NoxxLFGSettings.nlfgdebugmode then
+				DEFAULT_CHAT_FRAME.editBox:SetText("/" .. channelId .. " " .. lfmCreationMessage)
+				ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)
+			else
+				SendChatMessage(lfmCreationMessage, "WHISPER", nil, UnitName("player")) --DEBUGGING MODE
+				print(NoxxLFGBlueColor .. addonName .. ":|r You are currently in debug mode! No global messages have been sent!")
+				if channelString then
+					print("|cFFFFFFFFChat Channel Name: |cFFFFFF00" .. channelString)
+				else
+					print("|cFFFFFFFFChat Channel Name: |cFFFFFF00Null")
+				end
+				if channelId then
+					print("|cFFFFFFFFChat Channel ID: |cFFFFFF00" .. channelId)
+				else
+					print("|cFFFFFFFFChat Channel ID: |cFFFFFF00Null")
+				end
+			end
 		else
 			print(
 				NoxxLFGBlueColor
-					.. addonName
-					.. ": |rUnable to send message to |cFFFFFF00"
-					.. NoxxLFGSettings.lfmChannel
-					.. "|r channel! Make sure you've joined the channel first!"
+				.. addonName
+				.. ": |rUnable to send message to |cFFFFFF00"
+				.. NoxxLFGSettings.lfmChannel
+				.. "|r channel! Make sure you've joined the channel first!"
 			)
 		end
 	end
@@ -1136,25 +1157,39 @@ local function SendLFGMessage()
 		if channelId == 0 or channelString == nil then
 			print(
 				NoxxLFGBlueColor
-					.. addonName
-					.. ': |rFailure to post message to |cFFFFFF00"'
-					.. NoxxLFGSettings.lfgChannel
-					.. "\"|r. Please check the channel name and make sure you've joined it first!"
+				.. addonName
+				.. ': |rFailure to post message to |cFFFFFF00"'
+				.. NoxxLFGSettings.lfgChannel
+				.. "\"|r. Please check the channel name and make sure you've joined it first!"
 			)
 			return
 		end
 
 		if channelId > 0 then -- LIVE
-			-- DEFAULT_CHAT_FRAME.editBox:SetText("/" .. channelId .. " " .. lfgCreationMessage)
-			-- ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)
-			SendChatMessage(lfgCreationMessage, "WHISPER", nil, UnitName("player")) --DEBUGGING MODE
+			if not NoxxLFGSettings.nlfgdebugmode then
+				DEFAULT_CHAT_FRAME.editBox:SetText("/" .. channelId .. " " .. lfgCreationMessage)
+				ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)
+			else
+				SendChatMessage(lfgCreationMessage, "WHISPER", nil, UnitName("player")) --DEBUGGING MODE
+				print(NoxxLFGBlueColor .. addonName .. ":|r You are currently in debug mode! No global messages have been sent!")
+				if channelString then
+					print("|cFFFFFFFFChat Channel Name: |cFFFFFF00" .. channelString)
+				else
+					print("|cFFFFFFFFChat Channel Name: |cFFFFFF00Null")
+				end
+				if channelId then
+					print("|cFFFFFFFFChat Channel ID: |cFFFFFF00" .. channelId)
+				else
+					print("|cFFFFFFFFChat Channel ID: |cFFFFFF00Null")
+				end
+			end
 		else
 			print(
 				NoxxLFGBlueColor
-					.. addonName
-					.. ": |rUnable to send message to |cFFFFFF00"
-					.. NoxxLFGSettings.lfgChannel
-					.. "|r channel! Make sure you've joined the channel first!"
+				.. addonName
+				.. ": |rUnable to send message to |cFFFFFF00"
+				.. NoxxLFGSettings.lfgChannel
+				.. "|r channel! Make sure you've joined the channel first!"
 			)
 		end
 	end
@@ -1729,14 +1764,14 @@ local function UpdateLFMMessage(
 			if channelId > 0 and channelString then
 				previewTextFontString:SetText(
 					"|cFFFEC1C0["
-						.. channelId
-						.. ". "
-						.. channelString
-						.. "] [|c"
-						.. classColor[class]
-						.. UnitName("player")
-						.. "|r]: "
-						.. message
+					.. channelId
+					.. ". "
+					.. channelString
+					.. "] [|c"
+					.. classColor[class]
+					.. UnitName("player")
+					.. "|r]: "
+					.. message
 				)
 			else
 				previewTextFontString:SetText(
@@ -1761,8 +1796,9 @@ local function UpdateLFMMessage(
 		if postingMessage and #roles == 0 and totalRoles > 0 then
 			print(
 				NoxxLFGBlueColor
-					.. addonName
-					.. ": |cFFFFFF00Your group has been filled according to your set message. |r|rYou will no longer receive reminders to post your message."
+				.. addonName
+				..
+				": |cFFFFFF00Your group has been filled according to your set message. |r|rYou will no longer receive reminders to post your message."
 			)
 			ResetLFMMessage()
 			CancelTimer()
@@ -1799,14 +1835,14 @@ local function UpdateLFGMessage(dungeonRaidQuestText, playerRole, extraInfo)
 			if channelId > 0 and channelString then
 				previewLFGTextFontString:SetText(
 					"|cFFFEC1C0["
-						.. channelId
-						.. ". "
-						.. channelString
-						.. "] [|c"
-						.. classColor[class]
-						.. UnitName("player")
-						.. "|r]: "
-						.. message
+					.. channelId
+					.. ". "
+					.. channelString
+					.. "] [|c"
+					.. classColor[class]
+					.. UnitName("player")
+					.. "|r]: "
+					.. message
 				)
 			else
 				previewLFGTextFontString:SetText(
@@ -1831,8 +1867,9 @@ local function UpdateLFGMessage(dungeonRaidQuestText, playerRole, extraInfo)
 		if postingLFGMessage then
 			print(
 				NoxxLFGBlueColor
-					.. addonName
-					.. ": |cFFFFFF00Your group has been filled according to your set message. |r|rYou will no longer receive reminders to post your message."
+				.. addonName
+				..
+				": |cFFFFFF00Your group has been filled according to your set message. |r|rYou will no longer receive reminders to post your message."
 			)
 			ResetLFGMessage()
 			CancelLFGTimer()
@@ -2016,7 +2053,7 @@ postButtonFrameMessage:SetPoint("TOP", postButtonFrame, "TOP", 0, -35)
 postButtonFrameMessage:SetWidth(postButtonFrame:GetWidth() - 50)
 postButtonFrameMessage:SetWordWrap(true)
 
-local function PostButton(string)
+local function PostButton()
 	PlaySound(3081)
 	if postingMessage then
 		postButtonFrameMessage:SetText("|cFFFEC1C0" .. lfmCreationMessage)
@@ -2354,8 +2391,8 @@ local function OnSystemMessage(self, event, message)
 	then
 		print(
 			NoxxLFGBlueColor
-				.. addonName
-				.. ": |cFFFFFF00Your group has been disbanded. |r|rYou will no longer receive reminders to post your message."
+			.. addonName
+			.. ": |cFFFFFF00Your group has been disbanded. |r|rYou will no longer receive reminders to post your message."
 		)
 		if postingMessage then
 			ResetLFMMessage()
@@ -2431,11 +2468,11 @@ dungeonCategory:SetScript("OnMouseUp", function()
 		categorySearchFrameChildDungeons:Show()
 		mainFrame.title:SetText(
 			"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t "
-				.. NoxxLFGBlueColor
-				.. addonName
-				.. " v"
-				.. versionNum
-				.. "|r (Searching for Dungeons)"
+			.. NoxxLFGBlueColor
+			.. addonName
+			.. " v"
+			.. versionNum
+			.. "|r (Searching for Dungeons)"
 		)
 		PlaySound(808)
 	else
@@ -2458,11 +2495,11 @@ raidCategory:SetScript("OnMouseUp", function()
 		categorySearchFrameChildRaids:Show()
 		mainFrame.title:SetText(
 			"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t "
-				.. NoxxLFGBlueColor
-				.. addonName
-				.. " v"
-				.. versionNum
-				.. "|r (Searching for Raids)"
+			.. NoxxLFGBlueColor
+			.. addonName
+			.. " v"
+			.. versionNum
+			.. "|r (Searching for Raids)"
 		)
 		PlaySound(808)
 	else
@@ -2485,11 +2522,11 @@ travelCategory:SetScript("OnMouseUp", function()
 		categorySearchFrameChildTravel:Show()
 		mainFrame.title:SetText(
 			"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t "
-				.. NoxxLFGBlueColor
-				.. addonName
-				.. " v"
-				.. versionNum
-				.. "|r (Searching for Travel)"
+			.. NoxxLFGBlueColor
+			.. addonName
+			.. " v"
+			.. versionNum
+			.. "|r (Searching for Travel)"
 		)
 		PlaySound(808)
 	else
@@ -2512,11 +2549,11 @@ servicesCategory:SetScript("OnMouseUp", function()
 		categorySearchFrameChildServices:Show()
 		mainFrame.title:SetText(
 			"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t "
-				.. NoxxLFGBlueColor
-				.. addonName
-				.. " v"
-				.. versionNum
-				.. "|r (Searching for Services)"
+			.. NoxxLFGBlueColor
+			.. addonName
+			.. " v"
+			.. versionNum
+			.. "|r (Searching for Services)"
 		)
 		PlaySound(808)
 	else
@@ -2539,11 +2576,11 @@ eventsCategory:SetScript("OnMouseUp", function()
 		categorySearchFrameChildEvents:Show()
 		mainFrame.title:SetText(
 			"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t "
-				.. NoxxLFGBlueColor
-				.. addonName
-				.. " v"
-				.. versionNum
-				.. "|r (Searching for Events & PvP)"
+			.. NoxxLFGBlueColor
+			.. addonName
+			.. " v"
+			.. versionNum
+			.. "|r (Searching for Events & PvP)"
 		)
 		PlaySound(808)
 	else
@@ -2745,7 +2782,7 @@ local function cleanupOldDungeonGroups()
 			NoxxLFGListings.dungeonGroups
 			and #NoxxLFGListings.dungeonGroups > 0
 			and (currentTime - NoxxLFGListings.dungeonGroups[#NoxxLFGListings.dungeonGroups].timePosted)
-				> NoxxLFGSettings.dungeonsUpdateInterval
+			> NoxxLFGSettings.dungeonsUpdateInterval
 		do
 			if dungeonFrames[#dungeonFrames] then
 				dungeonFrames[#dungeonFrames]:Hide()
@@ -2780,7 +2817,7 @@ local function cleanupOldRaidGroups()
 			NoxxLFGListings.raidGroups
 			and #NoxxLFGListings.raidGroups > 0
 			and (currentTime - NoxxLFGListings.raidGroups[#NoxxLFGListings.raidGroups].timePosted)
-				> NoxxLFGSettings.raidsUpdateInterval
+			> NoxxLFGSettings.raidsUpdateInterval
 		do
 			if raidFoundFrames[#raidFoundFrames] then
 				raidFoundFrames[#raidFoundFrames]:Hide()
@@ -2985,9 +3022,9 @@ categorySearchFrameChildDungeons:SetScript("OnShow", function()
 	pausePlayButton:Show()
 	topHintText:SetText(
 		NoxxLFGBlueColor
-			.. "Left-click:|cFFFFFFFF Show Post Info\n"
-			.. NoxxLFGBlueColor
-			.. "Shift + Right-click: |cFFFFFFFFSend Invite|r"
+		.. "Left-click:|cFFFFFFFF Show Post Info\n"
+		.. NoxxLFGBlueColor
+		.. "Shift + Right-click: |cFFFFFFFFSend Invite|r"
 	)
 	dungeonFilterDropdown:Show()
 	topHintText:Show()
@@ -2998,9 +3035,9 @@ categorySearchFrameChildRaids:SetScript("OnShow", function()
 	pausePlayButton:Show()
 	topHintText:SetText(
 		NoxxLFGBlueColor
-			.. "Left-click:|cFFFFFFFF Start Whisper\n"
-			.. NoxxLFGBlueColor
-			.. "Shift + Right-click: |cFFFFFFFFSend Invite|r"
+		.. "Left-click:|cFFFFFFFF Start Whisper\n"
+		.. NoxxLFGBlueColor
+		.. "Shift + Right-click: |cFFFFFFFFSend Invite|r"
 	)
 	raidFilterDropdown:Show()
 	topHintText:Show()
@@ -3011,9 +3048,9 @@ categorySearchFrameChildTravel:SetScript("OnShow", function()
 	pausePlayButton:Show()
 	topHintText:SetText(
 		NoxxLFGBlueColor
-			.. "Left-click:|cFFFFFFFF Start Whisper\n"
-			.. NoxxLFGBlueColor
-			.. 'Shift + Right-click: |cFFFFFFFFSend "inv" Whisper'
+		.. "Left-click:|cFFFFFFFF Start Whisper\n"
+		.. NoxxLFGBlueColor
+		.. 'Shift + Right-click: |cFFFFFFFFSend "inv" Whisper'
 	)
 	topHintText:Show()
 end)
@@ -3023,9 +3060,9 @@ categorySearchFrameChildServices:SetScript("OnShow", function()
 	pausePlayButton:Show()
 	topHintText:SetText(
 		NoxxLFGBlueColor
-			.. "Left-click:|cFFFFFFFF Start Whisper\n"
-			.. NoxxLFGBlueColor
-			.. 'Shift + Right-click: |cFFFFFFFFSend "inv" Whisper'
+		.. "Left-click:|cFFFFFFFF Start Whisper\n"
+		.. NoxxLFGBlueColor
+		.. 'Shift + Right-click: |cFFFFFFFFSend "inv" Whisper'
 	)
 	topHintText:Show()
 end)
@@ -3035,9 +3072,9 @@ categorySearchFrameChildEvents:SetScript("OnShow", function()
 	pausePlayButton:Show()
 	topHintText:SetText(
 		NoxxLFGBlueColor
-			.. "Left-click:|cFFFFFFFF Start Whisper\n"
-			.. NoxxLFGBlueColor
-			.. 'Shift + Right-click: |cFFFFFFFFSend "inv" Whisper'
+		.. "Left-click:|cFFFFFFFF Start Whisper\n"
+		.. NoxxLFGBlueColor
+		.. 'Shift + Right-click: |cFFFFFFFFSend "inv" Whisper'
 	)
 	topHintText:Show()
 end)
@@ -4280,6 +4317,26 @@ end
 
 table.insert(UISpecialFrames, "NoxxLFGMainFrame")
 
+SLASH_NLFGDEBUG1 = "/nlfgdebug"
+SlashCmdList["NLFGDEBUG"] = function()
+	if NoxxLFGSettings.nlfgdebugmode then
+		NoxxLFGSettings.nlfgdebugmode = false
+		print(NoxxLFGBlueColor .. addonName .. ":|r Debug mode has been |cFFFFFF00disabled|r.")
+	else
+		NoxxLFGSettings.nlfgdebugmode = true
+		print(NoxxLFGBlueColor .. addonName .. ":|r Debug mode has been |cFFFFFF00enabled|r.")
+	end
+end
+
+SLASH_NLFGDEBUGSTATUS1 = "/nlfgdebugstatus"
+SlashCmdList["NLFGDEBUGSTATUS"] = function()
+	if NoxxLFGSettings.nlfgdebugmode then
+		print(NoxxLFGBlueColor .. addonName .. ":|r Debug mode is |cFFFFFF00disabled|r.")
+	else
+		print(NoxxLFGBlueColor .. addonName .. ":|r Debug mode is |cFFFFFF00enabled|r.")
+	end
+end
+
 categorySearchBackButton:SetScript("OnClick", function()
 	categoryFrame:Show()
 	lfmlfgButtonGroup:Show()
@@ -4306,6 +4363,10 @@ local function OnEvent(self, event, arg1)
 		CreateSettingsUI(settingsFrame)
 		CheckIfPaused()
 
+		if NoxxLFGSettings.nlfgdebugmode then
+			print(NoxxLFGBlueColor .. addonName .. ":|r You are currently running NoxxLFG in debug mode!")
+		end
+
 		local lfmChannelIndex, lfmChannelName = GetChannelName(NoxxLFGSettings.lfmChannel)
 		local lfgChannelIndex, lfgChannelName = GetChannelName(NoxxLFGSettings.lfgChannel)
 
@@ -4315,8 +4376,9 @@ local function OnEvent(self, event, arg1)
 		if lfmChannelIndex and lfmChannelIndex > 0 and lfmChannelName then
 			lfmCreationFrameHint:SetText(
 				"Use this tool to construct a message and post to |cFFFFFFFF"
-					.. lfmChannelName
-					.. "|r. When a member joins your party, you will be able to select their role to dynamically update your message and continue to post the message every 30 seconds when the reminder pops up."
+				.. lfmChannelName
+				..
+				"|r. When a member joins your party, you will be able to select their role to dynamically update your message and continue to post the message every 30 seconds when the reminder pops up."
 			)
 		else
 			lfmCreationFrameHint:SetText(
@@ -4327,8 +4389,8 @@ local function OnEvent(self, event, arg1)
 		if lfgChannelIndex and lfgChannelIndex > 0 and lfgChannelName then
 			lfgCreationFrameHint:SetText(
 				"Use this tool to construct a message and post to |cFFFFFFFF"
-					.. lfgChannelName
-					.. "|r. If posting as repeat, once you join a party, the repeated reminders to post your LFG message will cease."
+				.. lfgChannelName
+				.. "|r. If posting as repeat, once you join a party, the repeated reminders to post your LFG message will cease."
 			)
 		else
 			lfgCreationFrameHint:SetText(
@@ -4437,11 +4499,11 @@ function ToggleNoxxLFGWindowBind(openDungeons)
 			categorySearchFrameChildDungeons:Show()
 			mainFrame.title:SetText(
 				"|TInterface/AddOns/NoxxLFG/images/icon:20:20|t "
-					.. NoxxLFGBlueColor
-					.. addonName
-					.. " v"
-					.. versionNum
-					.. "|r (Searching for Dungeons)"
+				.. NoxxLFGBlueColor
+				.. addonName
+				.. " v"
+				.. versionNum
+				.. "|r (Searching for Dungeons)"
 			)
 		end
 	else
