@@ -3040,7 +3040,7 @@ categorySearchFrameChildRaids:SetScript("OnShow", function()
 	pausePlayButton:Show()
 	topHintText:SetText(
 		NoxxLFGBlueColor
-		.. "Left-click:|cFFFFFFFF Start Whisper\n"
+		.. "Left-click:|cFFFFFFFF Show Post Info\n"
 		.. NoxxLFGBlueColor
 		.. "Shift + Right-click: |cFFFFFFFFSend Invite|r"
 	)
@@ -3212,6 +3212,7 @@ local function addToDungeons(
 			end
 
 			sideWindow.activityTitle:SetText("|c" .. dungeonColor .. dungeon)
+
 			if subDungeon and subDungeon ~= "None" then
 				sideWindow.activityTitleSub:SetText("Wing: |cFFFFFFFF" .. subDungeon .. "|r")
 				sideWindow.messageFrame:SetPoint("TOPLEFT", sideWindow.activityTitleSub, "TOPLEFT", 0, -20)
@@ -3219,6 +3220,7 @@ local function addToDungeons(
 				sideWindow.activityTitleSub:SetText("")
 				sideWindow.messageFrame:SetPoint("TOPLEFT", sideWindow.activityTitle, "TOPLEFT", 0, -20)
 			end
+
 			if spamDungeon then
 				sideWindow.messageFrame:SetBackdropBorderColor(1, 0.4, 0.4)
 				sideWindow.messageFrame.spamDungeon:SetText("|cFFFF6666Multi-run Group")
@@ -3226,6 +3228,7 @@ local function addToDungeons(
 				sideWindow.messageFrame:SetBackdropBorderColor(0.6, 0.6, 0.6)
 				sideWindow.messageFrame.spamDungeon:SetText("")
 			end
+
 			sideWindow.messageFrame.message:SetText(
 				"|c" .. classColor .. author .. ":|r " .. "|cFFFFFFFF" .. msg .. "|r"
 			)
@@ -3350,8 +3353,39 @@ local function addToRaids(shortMsg, msg, author, timePosted, raid, raidColor, cl
 
 	foundFrameInteractions:SetScript("OnMouseUp", function(self, button)
 		if button == "LeftButton" then
-			PlaySound(808)
-			ChatFrame_OpenChat("/w " .. author .. " ")
+			if author:sub(-1) == "s" then
+				sideWindow.title:SetText("|c" .. classColor .. author .. "'|r Dungeon Post")
+			else
+				sideWindow.title:SetText("|c" .. classColor .. author .. "'s|r Dungeon Post")
+			end
+
+			sideWindow.activityTitle:SetText("|c" .. raidColor .. raid)
+
+			-- if subRaid and subRaid ~= "None" then
+			-- 	sideWindow.activityTitleSub:SetText("Wing: |cFFFFFFFF" .. subRaid .. "|r")
+			-- 	sideWindow.messageFrame:SetPoint("TOPLEFT", sideWindow.activityTitleSub, "TOPLEFT", 0, -20)
+			-- else
+			-- 	sideWindow.activityTitleSub:SetText("")
+			-- 	sideWindow.messageFrame:SetPoint("TOPLEFT", sideWindow.activityTitle, "TOPLEFT", 0, -20)
+			-- end
+
+			sideWindow.messageFrame.message:SetText(
+				"|c" .. classColor .. author .. ":|r " .. "|cFFFFFFFF" .. msg .. "|r"
+			)
+			sideWindow:Show()
+
+			sideWindow.actionFrame.inviteButton:SetScript("OnClick", function()
+				DEFAULT_CHAT_FRAME.editBox:SetText("/invite " .. author)
+				ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)
+			end)
+
+			sideWindow.actionFrame.whisperButton:SetScript("OnClick", function()
+				ChatFrame_OpenChat("/w " .. author .. " ")
+			end)
+
+			sideWindow.actionFrame.whoButton:SetScript("OnClick", function()
+				C_FriendList.SendWho(author)
+			end)
 		elseif button == "RightButton" and IsShiftKeyDown() then
 			DEFAULT_CHAT_FRAME.editBox:SetText("/invite " .. author)
 			ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)

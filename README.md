@@ -14,6 +14,8 @@ Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 * UI text updates.
 * Addition of valid parses for Nightmare Incursions.
 * Introduction of a proper debug mode using the "/nlfgdebug" command. Using this command prevents the sending of global messages and instead whispers yourself with your message, as well as displaying various other information.
+* Additional checks have been added before posting messages to check that another message is not automatically posting first. LFM/LFG messages will not be able to mix and timers will remain consistent across switching between the two posting methods.
+* The Side Window now shows for raids as well as dungeons. This allows you to view extra information that will be added in the future, as well as safely invite, message or "/who" a player.
 
 **TODO/WIP**
 * **WIP:** Role filtering in Dungeons/Raids/Events & PvP categories.
