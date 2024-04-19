@@ -15,14 +15,13 @@ Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 * Addition of valid parses for Nightmare Incursions.
 * Introduction of a proper debug mode using the "/nlfgdebug" command. Using this command prevents the sending of global messages and instead whispers yourself with your message, as well as displaying various other information.
 
-**v1.4.0 TODO/WIP**
-* **WIP:** More information/LFG message details to fill out as optional fields.
+**TODO/WIP**
+* **WIP:** Role filtering in Dungeons/Raids/Events & PvP categories.
 * **TODO:** Support the selection/linking of quests in the LFG Tool.
-* **TODO:** Role filtering in Dungeons/Raids/Events & PvP categories.
 * **TODO:** Ability to shift-click and link quests to your LFG message.
 
 ### Unique Features:
 * **NoxxLFM/LFG** - *Construct and post messages that dynamically update as you build your group.*
 * **Quick-Glance Icons** - *Quickly find what you need by using at-a-glance icons like gold/silver amount for travel or role icons for raid/dungeon finding!*
-* **Specific Categories** - *Use specific categories to keep the LFG frame small and focused on a specific type of group you're trying to find.*
-* **Performance Focused** - *By default, NoxxLFG will not log groups or posts unless you are using it, reserving your memory for more important things.*
+* **Categories** - *Select the specific category you need to keep the LFG frame light and focused on a specific type of group you're trying to find.*
+* **Performance Focused** - *By default, NoxxLFG will not log groups or posts unless you are using it, reserving your memory for more important things. This can be disabled in the settings.*
