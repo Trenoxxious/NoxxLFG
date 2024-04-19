@@ -125,39 +125,66 @@ local ignoreEventsGroups = {
 local ignoreSummoningGroups = { "WTB", "paying", "LF", "Need", "Tank", "DPS", "Healer", "|Hitem:", "any" }
 local ignoreServicesGroups = { "WTS |Hitem:", "LF ", "Need", "Tank", "DPS", "Healer", "WTB" }
 
+local availableRoles = {
+	{
+		role = "DPS",
+		checked = true,
+	},
+	{
+		role = "Tank",
+		checked = true,
+	},
+	{
+		role = "Healer",
+		checked = true,
+	},
+}
+
 local dungeons = {
 	{
 		name = "Ragefire Chasm",
+		location = "Orgrimmar (The Cleft of Shadow)",
+		levelRange = "13-19",
 		aliases = { "RFC", "Ragefire Chasm", "Ragefire", "Rage Fire", "Rage Fire Chasm", "Chasm" },
 		color = "FFDD7C7C",
 		checked = true,
 	},
 	{
 		name = "Deadmines",
+		location = "Westfall (Moonbrook)",
+		levelRange = "18-24",
 		aliases = { "VC", "VanCleef", "Van Cleef", "Deadmines", "Dead Mines" },
 		color = "FFE9866D",
 		checked = true,
 	},
 	{
 		name = "Wailing Caverns",
+		location = "The Barrens (South of Crossroads)",
+		levelRange = "19-25",
 		aliases = { "WC", "Wailing Caverns" },
 		color = "FF86E96D",
 		checked = true,
 	},
 	{
 		name = "Shadowfang Keep",
+		location = "Silverpine Forest (South of The Sepulcher)",
+		levelRange = "23-27",
 		aliases = { "Shadowfang Keep", "Shadow Fang Keep", "SFK", "Arugal" },
 		color = "FFBC6DE9",
 		checked = true,
 	},
 	{
 		name = "The Stockades",
+		location = "Stormwind (Northeast of The Mage Quarter)",
+		levelRange = "24-32",
 		aliases = { "Stocks", "Stockades", "The Stockades" },
 		color = "FF6DB7E9",
 		checked = true,
 	},
 	{
 		name = "Scarlet Monestary",
+		location = "Tirisfal Glades (Northeast Corner)",
+		levelRange = "29-42",
 		aliases = { "SM", "Scarlet Monestary", "Scarlet", "GY", "Cath", "Arm", "Lib" },
 		subDungeon = {
 			["Graveyard"] = { aliases = { "Graveyard", "GY" } },
@@ -170,30 +197,40 @@ local dungeons = {
 	},
 	{
 		name = "Uldaman",
+		location = "The Badlands (North Valley)",
+		levelRange = "42-50",
 		aliases = { "Uldaman", "Uld", "Ulda", "Uldman" },
 		color = "FFE9E76D",
 		checked = true,
 	},
 	{
 		name = "Razorfen Kraul",
+		location = "The Barrens (Southwestern Pass)",
+		levelRange = "28-34",
 		aliases = { "Razor Fen Kraul", "Razorfen Kraul", "RFK", "Kraul" },
 		color = "FFEC8448",
 		checked = true,
 	},
 	{
 		name = "Razorfen Downs",
+		location = "The Barrens (Southeastern Pass)",
+		levelRange = "41-46",
 		aliases = { "Razor Fen Downs", "Razorfen Downs", "RFD", "Downs" },
 		color = "FFF1742B",
 		checked = true,
 	},
 	{
 		name = "Zul'Farrak",
+		location = "Tanaris (Northwest of Gadgetzan)",
+		levelRange = "43-50",
 		aliases = { "ZF", "zul", "farrak", "zulfarrak" },
 		color = "FF5AB972",
 		checked = true,
 	},
 	{
 		name = "Maraudon",
+		location = "Desolace (North of Shadowprey Village)",
+		levelRange = "45-52",
 		aliases = {
 			"Mara",
 			"Purple",
@@ -218,12 +255,16 @@ local dungeons = {
 	},
 	{
 		name = "Blackrock Depths",
+		location = "Blackrock Mountain (Lower)",
+		levelRange = "50-60",
 		aliases = { "BRD", "Blackrock", "Depths" },
-		color = "FFD15241",
+		color = "FFE23F2A",
 		checked = true,
 	},
 	{
 		name = "Blackrock Spire",
+		location = "Blackrock Mountain (Upper)",
+		levelRange = "55-60",
 		aliases = {
 			"BRS",
 			"UBRS",
@@ -234,7 +275,7 @@ local dungeons = {
 			["UBRS"] = { aliases = { "UBRS", "Upper" } },
 			["LBRS"] = { aliases = { "LBRS", "Lower" } },
 		},
-		color = "FFAA1A32",
+		color = "FFD11736",
 		checked = true,
 	},
 }
@@ -242,18 +283,24 @@ local dungeons = {
 local raids = {
 	{
 		name = "Blackfathom Deeps",
+		location = "Ashenvale (Western Coast)",
+		levelRange = "25",
 		aliases = { "BFD", "Blackfathom Deeps", "Black Fathom Deeps", "Deeps" },
 		color = "FF3E8AEE",
 		checked = true,
 	},
 	{
 		name = "Gnomeregan",
+		location = "Dun Morogh (West of Brewnall Village)",
+		levelRange = "40",
 		aliases = { "Gnomer", "Regan", "Gnomeregan", "Gnome regan" },
 		color = "FFDBDBDB",
 		checked = true,
 	},
 	{
 		name = "Temple of Atal'Hakkar",
+		location = "Swamp of Sorrows (East of Stonard)",
+		levelRange = "50",
 		aliases = { "ST", "Sunken", "Temple", "Atal", "Hakkar" },
 		color = "FF319642",
 		checked = true,
@@ -1028,9 +1075,13 @@ lfmCreationFrameButton:SetSize(170, 30)
 lfmCreationFrameButton:SetText("Start LFM Message")
 
 lfmCreationFrameButton:SetScript("OnClick", function()
-	lfmlfgButtonGroup:Hide()
-	categoryFrame:Hide()
-	lfmCreationFrame:Show()
+	if not postingLFGMessage then
+		lfmlfgButtonGroup:Hide()
+		categoryFrame:Hide()
+		lfmCreationFrame:Show()
+	else
+		print(NoxxLFGBlueColor .. addonName .. ":|r Please cancel your LFG posting before attempting to construct an LFM message.")
+	end
 end)
 
 local lfgCreationFrameButton =
@@ -1040,9 +1091,13 @@ lfgCreationFrameButton:SetSize(170, 30)
 lfgCreationFrameButton:SetText("Start LFG Message")
 
 lfgCreationFrameButton:SetScript("OnClick", function()
-	lfmlfgButtonGroup:Hide()
-	categoryFrame:Hide()
-	lfgCreationFrame:Show()
+	if not postingMessage then
+		lfmlfgButtonGroup:Hide()
+		categoryFrame:Hide()
+		lfgCreationFrame:Show()
+	else
+		print(NoxxLFGBlueColor .. addonName .. ":|r Please cancel your LFM posting before attempting to construct an LFG message.")
+	end
 end)
 
 local lfmBackButton = CreateFrame("Button", nil, lfmCreationFrame, "UIPanelButtonTemplate")
@@ -2115,7 +2170,7 @@ lfmPostButtonAuto:SetScript("OnClick", function()
 		ClearTextBoxFocus()
 		if not postingMessage or postingLFGMessage then
 			SendMessage()
-			lfmPostButtonAuto:SetText("Reminding in 30s")
+			lfmPostButtonAuto:SetText("Cancel")
 			postingMessage = true
 			messageTimer = C_Timer.NewTicker(postingMessageTimer, PostButton)
 			mainFrame:Hide()
@@ -2152,7 +2207,7 @@ lfgPostButtonAuto:SetScript("OnClick", function()
 		ClearTextBoxFocus()
 		if not postingLFGMessage or postingMessage then
 			SendLFGMessage()
-			lfgPostButtonAuto:SetText("Reminding in 30s")
+			lfgPostButtonAuto:SetText("Cancel")
 			postingLFGMessage = true
 			LFGMessageTimer = C_Timer.NewTicker(postingMessageTimer, PostButton)
 			mainFrame:Hide()
@@ -2272,7 +2327,7 @@ local function ShowRoleSelectionPopup(playerName, tankCount, healerCount, dpsCou
 		dpsBtn:Disable()
 	end
 
-	tankBtn:SetScript("OnClick", function()
+	tankBtn:SetScript("OnClick", function(self)
 		local tankNum = tonumber(tankTextBox:GetText())
 
 		if tankNum > 0 then
@@ -2283,6 +2338,9 @@ local function ShowRoleSelectionPopup(playerName, tankCount, healerCount, dpsCou
 			end
 			frame:Hide()
 			visiblePopupsCount = visiblePopupsCount - 1
+		else
+			print(NoxxLFGBlueColor .. addonName .. ":|r Your group appears to have the required amount of tanks. Please choose a different option.")
+			self:Disable()
 		end
 		UpdateLFMMessage(
 			dungeonRaidTextBox:GetText(),
@@ -2301,7 +2359,7 @@ local function ShowRoleSelectionPopup(playerName, tankCount, healerCount, dpsCou
 		neededFrameTankText:SetText(tostring(tankAmt))
 	end)
 
-	healerBtn:SetScript("OnClick", function()
+	healerBtn:SetScript("OnClick", function(self)
 		local healerNum = tonumber(healerTextBox:GetText())
 
 		if healerNum > 0 then
@@ -2312,6 +2370,9 @@ local function ShowRoleSelectionPopup(playerName, tankCount, healerCount, dpsCou
 			end
 			frame:Hide()
 			visiblePopupsCount = visiblePopupsCount - 1
+		else
+			print(NoxxLFGBlueColor .. addonName .. ":|r Your group appears to have the required amount of healers. Please choose a different option.")
+			self:Disable()
 		end
 		UpdateLFMMessage(
 			dungeonRaidTextBox:GetText(),
@@ -2330,7 +2391,7 @@ local function ShowRoleSelectionPopup(playerName, tankCount, healerCount, dpsCou
 		neededFrameHealerText:SetText(tostring(healerAmt))
 	end)
 
-	dpsBtn:SetScript("OnClick", function()
+	dpsBtn:SetScript("OnClick", function(self)
 		local dpsNum = tonumber(dpsTextBox:GetText())
 
 		if dpsNum > 0 then
@@ -2341,6 +2402,9 @@ local function ShowRoleSelectionPopup(playerName, tankCount, healerCount, dpsCou
 			end
 			frame:Hide()
 			visiblePopupsCount = visiblePopupsCount - 1
+		else
+			print(NoxxLFGBlueColor .. addonName .. ":|r Your group appears to have the required amount of DPS. Please choose a different option.")
+			self:Disable()
 		end
 		UpdateLFMMessage(
 			dungeonRaidTextBox:GetText(),
@@ -2366,29 +2430,16 @@ local function ShowRoleSelectionPopup(playerName, tankCount, healerCount, dpsCou
 	return frame
 end
 
-local function CheckAndShowRolePopup(playerName)
-	if postingMessage then
-		if totalRoles and totalRoles > 0 and startedWithRoles then
-			local tankCount = tonumber(tankTextBox:GetText())
-			local healerCount = tonumber(healerTextBox:GetText())
-			local dpsCount = tonumber(dpsTextBox:GetText())
-
-			if (tankCount and tankCount > 0) or (healerCount and healerCount > 0) or (dpsCount and dpsCount > 0) then
-				ShowRoleSelectionPopup(playerName, tankCount, healerCount, dpsCount)
-			end
-		end
-	end
-end
-
 local function OnSystemMessage(self, event, message)
 	local joinPattern = "(.+) joins the party."
-	local joinedGroup = "You join a group." or "You join a raid group."
+	local joinedGroup = "You join the party."
+	local joinedRaid =  "You join the raid group."
 	local leaveText = "You leave the group."
 	local removedText = "You have been removed from the group."
 	local disbandedText = "Your group has been disbanded."
 
 	local disbanded = message:match(leaveText) or message:match(removedText) or message:match(disbandedText)
-	local officiallyJoined = message:match(joinedGroup)
+	local officiallyJoined = message:match(joinedGroup) or message:match(joinedRaid)
 
 	if
 		(disbanded and ((postingMessage and startedWithRoles) or postingLFGMessage))
@@ -2397,21 +2448,20 @@ local function OnSystemMessage(self, event, message)
 		print(
 			NoxxLFGBlueColor
 			.. addonName
-			.. ": |cFFFFFF00Your group has been disbanded. |r|rYou will no longer receive reminders to post your message."
+			.. ": |cFFFFFF00Fulfillment has been met for your LFM/LFG Post. |r|rYou will no longer receive reminders to post your message."
 		)
-		if postingMessage then
-			ResetLFMMessage()
-			CancelTimer()
-		elseif postingLFGMessage then
-			ResetLFGMessage()
-			CancelLFGTimer()
-		end
+		ResetLFMMessage()
+		CancelTimer()
+		ResetLFGMessage()
+		CancelLFGTimer()
 	end
 
 	if not UnitAffectingCombat("player") then
 		local playerName = message:match(joinPattern)
 		if playerName then
-			CheckAndShowRolePopup(playerName)
+			if postingMessage then
+				NoxxLFG:CheckAndShowRolePopup(playerName, tankTextBox:GetText(), healerTextBox:GetText(), dpsTextBox:GetText(), startedWithRoles, totalRoles)
+			end
 		else
 			triedToShowPopup = true
 			table.insert(triedToShowPlayerNames, playerName)
@@ -2798,10 +2848,21 @@ local function cleanupOldDungeonGroups()
 	end
 
 	for i = #NoxxLFGListings.dungeonGroups, 1, -1 do
+		local dungeonRoles = NoxxLFGListings.dungeonGroups[i].rolesNeeded
 		local dungeonName = NoxxLFGListings.dungeonGroups[i].dungeonName
 		local dungeonData = getDungeonByName(dungeonName)
 		if dungeonData then
 			if not dungeonData.checked then
+				if dungeonFrames[i] then
+					dungeonFrames[i]:Hide()
+					table.remove(dungeonFrames, i)
+				end
+				table.remove(NoxxLFGListings.dungeonGroups, i)
+			end
+		end
+
+		for _, role in ipairs(dungeonRoles) do
+			if not role.checked then
 				if dungeonFrames[i] then
 					dungeonFrames[i]:Hide()
 					table.remove(dungeonFrames, i)
@@ -2998,6 +3059,29 @@ local function initializeDungeonDropdown(self, level)
 end
 
 LibDD:UIDropDownMenu_Initialize(dungeonFilterDropdown, initializeDungeonDropdown)
+
+local dungeonRoleFilterDropdown = LibDD:Create_UIDropDownMenu("DungeonFilterDropdown", mainFrame)
+dungeonRoleFilterDropdown:SetPoint("LEFT", checkAllDungeonsButton, "RIGHT", 15, 0)
+dungeonRoleFilterDropdown:Hide()
+LibDD:UIDropDownMenu_SetWidth(dungeonRoleFilterDropdown, 150)
+LibDD:UIDropDownMenu_SetText(dungeonRoleFilterDropdown, "Filter By Role")
+
+local function initializeDungeonRolesDropdown(self, level)
+	local info = LibDD:UIDropDownMenu_CreateInfo()
+	for i, role in ipairs(availableRoles) do
+		info.text = role.role
+		info.isNotRadio = true
+		info.keepShownOnClick = true
+		info.func = function(self)
+			role.checked = not role.checked
+			cleanupOldDungeonGroups()
+		end
+		info.checked = role.checked
+		LibDD:UIDropDownMenu_AddButton(info, level)
+	end
+end
+
+LibDD:UIDropDownMenu_Initialize(dungeonRoleFilterDropdown, initializeDungeonRolesDropdown)
 
 local raidFilterDropdown = LibDD:Create_UIDropDownMenu("RaidFilterDropdown", mainFrame)
 raidFilterDropdown:Hide()
@@ -3729,24 +3813,24 @@ local function trimMessage(msg, maxLength)
 	end
 end
 
-local needPhrases = { "LFM", "Looking for More", "LF", "Need" }
-local rolesTable = {
-	{
-		name = "Healer",
-		aliases = { "Heals", "Healer", "Heal" },
-	},
-	{
-		name = "Tank",
-		aliases = { "Tank", "Tanks", "OT ", "MT " },
-	},
-	{
-		name = "DPS",
-		aliases = { "Damage", "DPS" },
-	},
-}
-
 local function eventHandler(self, event, ...)
 	local msg, author, language, channelString, target, flags, _, channelNumber, channelName, _, counter, guid = ...
+
+	local needPhrases = { "LFM", "Looking for More", "LF", "Need" }
+	local rolesTable = {
+		{
+			name = "Healer",
+			aliases = { "Heals", "Healer", "Heal" },
+		},
+		{
+			name = "Tank",
+			aliases = { "Tank", "Tanks", "OT ", "MT " },
+		},
+		{
+			name = "DPS",
+			aliases = { "Damage", "DPS" },
+		},
+	}
 
 	if guid and msg and author and channelName then
 		local localizedClass, englishClass, localizedRace, englishRace, sex, name, realm = GetPlayerInfoByGUID(guid)
@@ -3870,11 +3954,8 @@ local function eventHandler(self, event, ...)
 			local needsTable = {}
 
 			for _, needphrase in ipairs(needPhrases) do
-				local neededPhraseFound = false
 				local startIndex, endIndex = msgLower:find(needphrase:lower())
 				if startIndex then
-					neededPhraseFound = true
-
 					local messageAfterNeedPhrase = msgLower:sub(endIndex + 1)
 
 					for _, roleneeded in ipairs(rolesTable) do
@@ -4486,7 +4567,9 @@ local function OnEvent(self, event, arg1)
 		if triedToShowPopup then
 			if triedToShowPlayerNames then
 				for _, playerWaiting in ipairs(triedToShowPlayerNames) do
-					CheckAndShowRolePopup(playerWaiting)
+					if postingMessage then
+						NoxxLFG:CheckAndShowRolePopup(playerWaiting, tankTextBox:GetText(), healerTextBox:GetText(), dpsTextBox:GetText(), startedWithRoles, totalRoles)
+					end
 				end
 			end
 			triedToShowPopup = false
@@ -4573,7 +4656,7 @@ local miniButton = LibStub("LibDataBroker-1.1"):NewDataObject("NoxxLFG", {
 	end,
 })
 
-local icon = LibStub("LibDBIcon-1.0", true)
+NoxxMinimapIcon = LibStub("LibDBIcon-1.0", true)
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function addon:OnInitialize()
@@ -4587,7 +4670,7 @@ function addon:OnInitialize()
 	})
 
 	---@diagnostic disable-next-line: param-type-mismatch
-	icon:Register("NoxxLFG", miniButton, self.db.profile.minimap)
+	NoxxMinimapIcon:Register("NoxxLFG", miniButton, self.db.profile.minimap)
 end
 
-icon:Show("NoxxLFG")
+NoxxMinimapIcon:Show("NoxxLFG")
