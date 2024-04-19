@@ -4,9 +4,9 @@
 Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 
 **Current Stable Version:** 1.3.21\
-*Working/Testing Version:* 1.4.0
+*Development Version:* 1.4.0
 
-#### Working/Testing Version Updates
+#### Development Version Updates
 **v1.4.0 Updates**
 * The LFG Tool (message constructor) is now available. Construct simple LFG requests and post to your set channel (or LookingForGroup by default) every 30 seconds as normal.
 * Ragefire Chasm color changed slightly.
