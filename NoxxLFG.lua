@@ -407,6 +407,11 @@ local summons = {
 		aliases = { "Ash", "Ashenvale" },
 		color = "FF936C97",
 	},
+	{
+		name = "Moonglade",
+		aliases = { "Moon", "Glade", "Glades", "Moonglades", "Moonglade" },
+		color = "FF9BDFD4",
+	},
 }
 
 local services = {
@@ -554,6 +559,7 @@ end)
 local sideWindow = CreateFrame("Frame", "NoxxLFGFSideWindow", mainFrame, "BasicFrameTemplateWithInset")
 sideWindow:SetSize(275, 300)
 sideWindow:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", 280, 0)
+sideWindow:SetFrameStrata("HIGH")
 
 sideWindow.TitleBg:SetHeight(30)
 sideWindow.title = sideWindow:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -601,19 +607,19 @@ sideWindow.actionFrame:SetBackdrop({
 sideWindow.actionFrame:SetBackdropBorderColor(0.6, 0.6, 0.6)
 sideWindow.actionFrame.inviteButton =
 	CreateFrame("Button", "NoxxLFGSideWindowInviteButton", sideWindow, "UIPanelButtonTemplate")
-sideWindow.actionFrame.inviteButton:SetFrameStrata("HIGH")
+sideWindow.actionFrame.inviteButton:SetFrameStrata("DIALOG")
 sideWindow.actionFrame.inviteButton:SetPoint("TOPLEFT", sideWindow.actionFrame, "TOPLEFT", 8, -8)
 sideWindow.actionFrame.inviteButton:SetSize(115, 20)
 sideWindow.actionFrame.inviteButton:SetText("Invite to Group")
 sideWindow.actionFrame.whisperButton =
 	CreateFrame("Button", "NoxxLFGSideWindowInviteButton", sideWindow, "UIPanelButtonTemplate")
-sideWindow.actionFrame.whisperButton:SetFrameStrata("HIGH")
+sideWindow.actionFrame.whisperButton:SetFrameStrata("DIALOG")
 sideWindow.actionFrame.whisperButton:SetPoint("TOPLEFT", sideWindow.actionFrame.inviteButton, "BOTTOMLEFT", 0, -5)
 sideWindow.actionFrame.whisperButton:SetSize(115, 20)
 sideWindow.actionFrame.whisperButton:SetText("Start Whisper")
 sideWindow.actionFrame.whoButton =
 	CreateFrame("Button", "NoxxLFGSideWindowInviteButton", sideWindow, "UIPanelButtonTemplate")
-sideWindow.actionFrame.whoButton:SetFrameStrata("HIGH")
+sideWindow.actionFrame.whoButton:SetFrameStrata("DIALOG")
 sideWindow.actionFrame.whoButton:SetPoint("LEFT", sideWindow.actionFrame.inviteButton, "RIGHT", 5, 0)
 sideWindow.actionFrame.whoButton:SetSize(115, 20)
 sideWindow.actionFrame.whoButton:SetText("/who Player")
@@ -1307,7 +1313,8 @@ postAGroupText:SetText(headerColor .. "Post a Group Advertisement:")
 
 postAGroupText:SetScript("OnEnter", function(self)
 	GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
-	GameTooltip:SetText("LFM Messages Post to: |cFFFFFFFF" .. NoxxLFGSettings.lfmChannel)
+	GameTooltip:SetText("Posting Info:")
+	GameTooltip:AddLine("LFM Messages Post to: |cFFFFFFFF" .. NoxxLFGSettings.lfmChannel)
 	GameTooltip:AddLine("LFG Messages Post to: |cFFFFFFFF" .. NoxxLFGSettings.lfgChannel)
 	GameTooltip:Show()
 end)
@@ -2201,6 +2208,11 @@ lfmPostButtonAuto:SetScript("OnClick", function()
 			startedWithRoles = false
 			totalRoles = 0
 			lfmPostButtonAuto:SetText("Repeat Post")
+			print(
+				NoxxLFGBlueColor
+					.. addonName
+					.. ":|r Post canceled. You will no longer receive reminders to post your message."
+			)
 			neededFrame:Hide()
 			CancelTimer()
 			CancelLFGTimer()
@@ -2225,6 +2237,11 @@ lfgPostButtonAuto:SetScript("OnClick", function()
 		else
 			postingLFGMessage = false
 			lfgPostButtonAuto:SetText("Repeat Post")
+			print(
+				NoxxLFGBlueColor
+					.. addonName
+					.. ":|r Post canceled. You will no longer receive reminders to post your message."
+			)
 			CancelLFGTimer()
 			CancelTimer()
 		end
@@ -3446,8 +3463,8 @@ local function addToRaids(shortMsg, msg, author, timePosted, raid, raidColor, cl
 			-- 	sideWindow.activityTitleSub:SetText("Wing: |cFFFFFFFF" .. subRaid .. "|r")
 			-- 	sideWindow.messageFrame:SetPoint("TOPLEFT", sideWindow.activityTitleSub, "TOPLEFT", 0, -20)
 			-- else
-			-- 	sideWindow.activityTitleSub:SetText("")
-			-- 	sideWindow.messageFrame:SetPoint("TOPLEFT", sideWindow.activityTitle, "TOPLEFT", 0, -20)
+			sideWindow.activityTitleSub:SetText("")
+			sideWindow.messageFrame:SetPoint("TOPLEFT", sideWindow.activityTitle, "TOPLEFT", 0, -20)
 			-- end
 
 			sideWindow.messageFrame.message:SetText(
