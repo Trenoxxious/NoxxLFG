@@ -6,11 +6,13 @@
 ## RequiredDeps:
 ## X-Curse-Project-ID: 981664
 ## SavedVariables: NoxxLFGSettings, NoxxMinimapPosDB, NoxxLFGListings
+## SavedVariablesPerCharacter: NoxxLFGSetRole
 # Libraries
 lib/Ace3/AceAddon-3.0/AceAddon-3.0.lua
 lib/!LibUIDropDownMenu/LibStub/LibStub.lua
 lib/Ace3/AceDB-3.0/AceDB-3.0.lua
 lib/!LibUIDropDownMenu/LibUIDropDownMenu/LibUIDropDownMenu.lua
 lib/LibDBIcon-1.0/embeds.xml
+funcs/nlfgfuncs.lua
 # MAIN FILE (MUST REMAIN FIRST IN LIST OF CUSTOMS)
 NoxxLFG.lua

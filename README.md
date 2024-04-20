@@ -15,14 +15,19 @@ Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 * Yell and Say are now valid channels when NoxxLFG parses messages. This is extra and does not need to be added to the settings. This is a new-ish feature and will need some proper testing.
 * Various UI text updates for clarity.
 * Addition of valid parses for Nightmare Incursions.
+* Moonglade added as a travel location.
 * Introduction of a proper debug mode using the "/nlfgdebug" command. Using this command prevents the sending of global messages and instead whispers yourself with your message, as well as displaying various other information.
 * The "Repeat Post" button now changes to "Cancel" instead of "Reminding in 30s" to make it clear that it can be canceled with the same button.
 * The Side Window now shows for raids as well as dungeons. This allows you to view extra information that will be added in the future, as well as safely invite, message or "/who" a player.
-* Global Funcs added to support the increasing local variables being created in the main file. Functions will be slowly moved over to Global Funcs over time.
+* FrameStrata fixed for side window.
 * As a first step toward providing more information in the side window of Dungeons and Raids, they have been given locations and level ranges appropriate for the activity. These will be added to the side window interface in the future.
+* 140% client scale added to settings for accessibility, up from 120% (which is still an option) as the previous largest.
+* Options rearranged in order and a default option param has been added to all settings with multiple options. This will make choosing an option in a dropdown menu much less confusing.
+* Local variable clean-up and merging into parents.
+* .toc file updated to include latest funcs directory.
 
 **TODO/WIP**
-* **WIP:** Role filtering in Dungeons has been enabled as a test feature and the update will roll out for raids and events when ready.
+* **WIP:** Role highlighting is a work in progress. Posts will highlight a specific color depending on if the post has a matching role to yours.
 * **TODO:** Support the selection/linking of quests in the LFG Tool.
 * **TODO:** More information in the "side window" for dungeons and raids when a player left-clicks a post.
 * **TODO:** Ability to shift-click and link quests to your LFG message.

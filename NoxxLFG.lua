@@ -646,29 +646,28 @@ settingsFrame:Hide()
 local settingsButton = CreateFrame("Button", "NoxxLFGSettingsButtonFrame", mainFrame)
 settingsButton:SetSize(24, 24)
 settingsButton:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", -14, -32)
-
-local settingsButtonTexture = settingsButton:CreateTexture(nil, "OVERLAY")
-settingsButtonTexture:SetAllPoints(settingsButton)
-settingsButtonTexture:SetTexture("Interface\\AddOns\\NoxxLFG\\images\\settingbuttonatlas")
-settingsButtonTexture:SetTexCoord(0, 0.5, 0, 0.5)
+settingsButton.settingsButtonTexture = settingsButton:CreateTexture(nil, "OVERLAY")
+settingsButton.settingsButtonTexture:SetAllPoints(settingsButton)
+settingsButton.settingsButtonTexture:SetTexture("Interface\\AddOns\\NoxxLFG\\images\\settingbuttonatlas")
+settingsButton.settingsButtonTexture:SetTexCoord(0, 0.5, 0, 0.5)
 
 settingsButton:SetScript("OnEnter", function()
-	settingsButtonTexture:SetTexCoord(0.5, 1, 0, 0.5)
+	settingsButton.settingsButtonTexture:SetTexCoord(0.5, 1, 0, 0.5)
 end)
 
 settingsButton:SetScript("OnLeave", function()
-	settingsButtonTexture:SetTexCoord(0, 0.5, 0, 0.5)
+	settingsButton.settingsButtonTexture:SetTexCoord(0, 0.5, 0, 0.5)
 end)
 
 settingsButton:SetScript("OnMouseDown", function()
 	PlaySound(808)
-	settingsButtonTexture:SetTexCoord(0, 0.5, 0.5, 1)
+	settingsButton.settingsButtonTexture:SetTexCoord(0, 0.5, 0.5, 1)
 end)
 
 settingsButton:SetScript("OnMouseUp", function()
 	mainFrame:Hide()
 	settingsFrame:Show()
-	settingsButtonTexture:SetTexCoord(0, 0.5, 0, 0.5)
+	settingsButton.settingsButtonTexture:SetTexCoord(0, 0.5, 0, 0.5)
 end)
 
 settingsFrame:SetScript("OnHide", function(self)
@@ -678,8 +677,8 @@ end)
 
 StaticPopupDialogs["CONFIRM_RELOAD_UI"] = {
 	text = "This change require a UI reload to reflect changes in the addon. Reload now?",
-	button1 = "Sure, reload",
-	button2 = "Not now",
+	button1 = "Sure, reload!",
+	button2 = "Not now.",
 	OnAccept = function()
 		ReloadUI()
 	end,
@@ -699,7 +698,8 @@ local settings = {
 			type = "Dropdown",
 			text = "|cFFb265c2Travel|r Removal Interval (sec)",
 			key = "travelUpdateInterval",
-			options = { 60, 30, 90, 120 },
+			options = { 30, 60, 90, 120 },
+			defaultOption = 60,
 			width = 60,
 			tooltip = 'Entries in the |cFFFFFFFF"Travel"|r category will disappear after the set time.',
 		},
@@ -707,7 +707,8 @@ local settings = {
 			type = "Dropdown",
 			text = "|cFFb5b5b5Dungeons|r Removal Interval (sec)",
 			key = "dungeonsUpdateInterval",
-			options = { 90, 60, 120, 150, 300 },
+			options = { 60, 90, 120, 150, 300 },
+			defaultOption = 90,
 			width = 60,
 			tooltip = 'Entries in the |cFFFFFFFF"Dungeons"|r category will disappear after the set time.',
 		},
@@ -715,7 +716,8 @@ local settings = {
 			type = "Dropdown",
 			text = "|cFFe86b6bRaids|r Removal Interval (sec)",
 			key = "raidsUpdateInterval",
-			options = { 90, 60, 120, 150, 300 },
+			options = { 60, 90, 120, 150, 300 },
+			defaultOption = 90,
 			width = 60,
 			tooltip = 'Entries in the |cFFFFFFFF"Raids"|r category will disappear after the set time.',
 		},
@@ -723,7 +725,8 @@ local settings = {
 			type = "Dropdown",
 			text = "|cFF7be08cServices|r Removal Interval (sec)",
 			key = "servicesUpdateInterval",
-			options = { 60, 30, 90, 120, 300 },
+			options = { 30, 60, 90, 120, 300 },
+			defaultOption = 60,
 			width = 60,
 			tooltip = 'Entries in the |cFFFFFFFF"Services"|r category will disappear after the set time.',
 		},
@@ -731,7 +734,8 @@ local settings = {
 			type = "Dropdown",
 			text = "|cFF5d8ea3Events|r Removal Interval (sec)",
 			key = "eventsUpdateInterval",
-			options = { 60, 30, 90, 120, 300 },
+			options = { 30, 60, 90, 120, 300 },
+			defaultOption = 60,
 			width = 60,
 			tooltip = 'Entries in the |cFFFFFFFF"Events"|r category will disappear after the set time.',
 		},
@@ -739,7 +743,8 @@ local settings = {
 			type = "Dropdown",
 			text = "NoxxLFG Window Scale",
 			key = "clientScale",
-			options = { "100%", "120%", "110%", "90%", "80%" },
+			options = { "140%", "120", "110%", "100%", "90%", "80%" },
+			defaultOption = "100%",
 			width = 60,
 			tooltip = "Set the scale of |cFFFFFFFFNoxxLFG|r.",
 		},
@@ -748,6 +753,7 @@ local settings = {
 			text = "Opacity Level While Moving",
 			key = "windowOpacityWhileMoving",
 			options = { "100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%" },
+			defaultOption = "100%",
 			width = 60,
 			tooltip = "While moving, set all |cFFFFFFFFNoxxLFG Windows|r to the specified opacity.",
 		},
@@ -833,7 +839,7 @@ local function CreateDropdown(parent, id, label, tooltipText, point, dbKey, sett
 	LibDD:UIDropDownMenu_SetWidth(dropdown, width)
 
 	if not NoxxLFGSettings[dbKey] or not tContains(settingOptions, NoxxLFGSettings[dbKey]) then
-		NoxxLFGSettings[dbKey] = settingOptions[1]
+		NoxxLFGSettings[dbKey] = NoxxLFGSettings[dbKey].defaultOption
 	end
 
 	LibDD:UIDropDownMenu_SetText(dropdown, NoxxLFGSettings[dbKey])
@@ -876,15 +882,14 @@ local function CreateSettingsTextBox(parent, id, label, tooltipText, point, dbKe
 	local container = CreateFrame("Frame", parent:GetName() .. "TextBoxContainer" .. id, parent)
 	container:SetPoint(unpack(point))
 	container:SetSize(width + 20, 25)
-
-	local textLabel = container:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	textLabel:SetText(label)
-	textLabel:SetScale(0.8)
-	textLabel:SetPoint("LEFT", container, "LEFT", 5, 5)
+	container.textLabel = container:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	container.textLabel:SetText(label)
+	container.textLabel:SetScale(0.8)
+	container.textLabel:SetPoint("LEFT", container, "LEFT", 5, 5)
 
 	local textBox = CreateFrame("EditBox", parent:GetName() .. "TextBox" .. id, container, "InputBoxTemplate")
 	textBox:SetAutoFocus(false)
-	textBox:SetPoint("LEFT", textLabel, "RIGHT", 10, 0)
+	textBox:SetPoint("LEFT", container.textLabel, "RIGHT", 10, 0)
 	textBox:SetWidth(width)
 	textBox:SetHeight(15)
 	textBox:SetScale(0.8)
@@ -2211,7 +2216,7 @@ lfmPostButtonAuto:SetScript("OnClick", function()
 			print(
 				NoxxLFGBlueColor
 					.. addonName
-					.. ":|r Post canceled. You will no longer receive reminders to post your message."
+					.. ": |cFFFFFF00Posting canceled. |r|rYou will no longer receive reminders to post your message."
 			)
 			neededFrame:Hide()
 			CancelTimer()
@@ -2240,7 +2245,7 @@ lfgPostButtonAuto:SetScript("OnClick", function()
 			print(
 				NoxxLFGBlueColor
 					.. addonName
-					.. ":|r Post canceled. You will no longer receive reminders to post your message."
+					.. ": |cFFFFFF00Posting canceled. |r|rYou will no longer receive reminders to post your message."
 			)
 			CancelLFGTimer()
 			CancelTimer()
@@ -2304,7 +2309,7 @@ local uiElementsToUpdate = {
 
 setupUpdateMessageHandler(uiElementsToUpdate)
 
-local function ShowRoleSelectionPopup(playerName, tankCount, healerCount, dpsCount)
+function NoxxLFG:ShowRoleSelectionPopup(playerName, tankCount, healerCount, dpsCount)
 	visiblePopupsCount = visiblePopupsCount + 1
 
 	local frame = CreateFrame("Frame", "CustomRoleSelectionFrame" .. visiblePopupsCount, UIParent, "BackdropTemplate")
@@ -4507,7 +4512,7 @@ local function OnEvent(self, event, arg1)
 		lfmChannelName = lfmChannelIndex and lfmChannelName or "LookingForGroup"
 		lfgChannelName = lfgChannelIndex and lfgChannelName or "LookingForGroup"
 
-		if lfmChannelIndex and lfmChannelIndex > 0 and lfmChannelName then
+		if lfmChannelIndex and lfmChannelIndex > 0 then
 			lfmCreationFrameHint:SetText(
 				"Use this tool to construct a message and post to |cFFFFFFFF"
 					.. lfmChannelName
@@ -4519,7 +4524,7 @@ local function OnEvent(self, event, arg1)
 			)
 		end
 
-		if lfgChannelIndex and lfgChannelIndex > 0 and lfgChannelName then
+		if lfgChannelIndex and lfgChannelIndex > 0 then
 			lfgCreationFrameHint:SetText(
 				"Use this tool to construct a message and post to |cFFFFFFFF"
 					.. lfgChannelName
