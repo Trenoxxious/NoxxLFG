@@ -3,7 +3,7 @@
 
 Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 
-**Current Stable Version:** 1.3.21
+**Current Stable Version:** 1.3.21\
 *Development Version:* 1.4.0
 
 #### Development Version Updates
