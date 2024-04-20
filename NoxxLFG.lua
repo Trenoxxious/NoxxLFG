@@ -45,8 +45,8 @@ local function CancelLFGTimer()
 	end
 end
 
-NoxxLFGBlueColor = "|cFF6595E7"
 NoxxLFGBlueColorNoC = "FF6595E7"
+NoxxLFGBlueColor = "|c" .. NoxxLFGBlueColorNoC
 
 if not NoxxLFGSettings then
 	NoxxLFGSettings = {}
@@ -3828,7 +3828,7 @@ local function eventHandler(self, event, ...)
 		},
 		{
 			name = "DPS",
-			aliases = { "Damage", "DPS" },
+			aliases = { "Damage", "DPS", "Deeps", "Pumper" },
 		},
 	}
 
