@@ -12,7 +12,7 @@ Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 * Ragefire Chasm color changed slightly.
 * Blackrock Depths color changed slightly.
 * Blackrock Spire color changed slightly.
-* Yell and Say are now valid channels when NoxxLFG parses messages. This is extra and does not need to be added to the settings. This is a new-ish feature and will need some proper testing.
+* "Yell" and "Say" are now valid channels when NoxxLFG parses messages. This is extra and does not need to be added to the settings. This is a new-ish feature and will need some proper testing.
 * Various UI text updates for clarity.
 * Addition of valid parses for Nightmare Incursions.
 * Moonglade added as a travel location.
@@ -21,16 +21,16 @@ Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 * The Side Window now shows for raids as well as dungeons. This allows you to view extra information that will be added in the future, as well as safely invite, message or "/who" a player.
 * FrameStrata fixed for side window.
 * As a first step toward providing more information in the side window of Dungeons and Raids, they have been given locations and level ranges appropriate for the activity. These will be added to the side window interface in the future.
-* 140% client scale added to settings for accessibility, up from 120% (which is still an option) as the previous largest.
+* 140% and 130% client scales added to settings for accessibility, up from 120% (which is still an option) as the previous largest.
 * Options rearranged in order and a default option param has been added to all settings with multiple options. This will make choosing an option in a dropdown menu much less confusing.
 * Local variable clean-up and merging into parents.
 * .toc file updated to include latest funcs directory.
+* Role highlighting has been enabled and is a work in progress. Post borders will be highlighted in a green color depending on if the post has a matching role to the one you've set with NoxxLFG.
+* The NoxxLFG blue color has been lightened slightly.
 
 **TODO/WIP**
-* **WIP:** Role highlighting is a work in progress. Posts will highlight a specific color depending on if the post has a matching role to yours.
-* **TODO:** Support the selection/linking of quests in the LFG Tool.
-* **TODO:** More information in the "side window" for dungeons and raids when a player left-clicks a post.
-* **TODO:** Ability to shift-click and link quests to your LFG message.
+* **WIP:** More information in the "side window" for dungeons and raids when a player left-clicks a post.
+* **TODO:** Support the selection/linking of quests in the LFG Message Constructor Tool.
 
 ### Unique Features:
 * **NoxxLFM/LFG** - *Construct and post messages that dynamically update as you build your group.*

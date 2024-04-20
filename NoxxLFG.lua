@@ -1,9 +1,9 @@
 ---@diagnostic disable: undefined-field
 NoxxLFG = NoxxLFG or {}
-
+NoxxLFGBlueColorNoC = "FF65A8E7"
+NoxxLFGBlueColor = "|c" .. NoxxLFGBlueColorNoC
 local addonName = "NoxxLFG"
 local versionNum = "1.4.0"
-local headerColor = "|cFFFCC453"
 local LibDD = LibStub:GetLibrary("LibUIDropDownMenu-4.0")
 local shortMessageLength = 35
 local hoveredCategory = false
@@ -16,6 +16,7 @@ local triedToShowPlayerNames = {}
 local postingMessageTimer = 30
 local totalRoles = 0
 local startedWithRoles = false
+local headerColor = "|cFFFCC453"
 local messageTimer
 local LFGMessageTimer
 
@@ -45,11 +46,16 @@ local function CancelLFGTimer()
 	end
 end
 
-NoxxLFGBlueColorNoC = "FF6595E7"
-NoxxLFGBlueColor = "|c" .. NoxxLFGBlueColorNoC
-
 if not NoxxLFGSettings then
 	NoxxLFGSettings = {}
+end
+
+if not NoxxLFGSetRole then
+	NoxxLFGSetRole = {}
+end
+
+if not NoxxLFGSetRole.role then
+	NoxxLFGSetRole.role = "None"
 end
 
 if not NoxxLFGSettings.pausedSearching then
@@ -124,21 +130,6 @@ local ignoreEventsGroups = {
 
 local ignoreSummoningGroups = { "WTB", "paying", "LF", "Need", "Tank", "DPS", "Healer", "|Hitem:", "any" }
 local ignoreServicesGroups = { "WTS |Hitem:", "LF ", "Need", "Tank", "DPS", "Healer", "WTB" }
-
-local availableRoles = {
-	{
-		role = "DPS",
-		checked = true,
-	},
-	{
-		role = "Tank",
-		checked = true,
-	},
-	{
-		role = "Healer",
-		checked = true,
-	},
-}
 
 local dungeons = {
 	{
@@ -556,6 +547,19 @@ mainFrame:SetScript("OnShow", function()
 	PlaySound(808)
 end)
 
+mainFrame.roleSelectionFrame = mainFrame:CreateFrame("Frame", "NoxxLFGRoleSelectionFrame", mainFrame, "BasicFrameTemplateWithInset")
+mainFrame.roleSelectionFrame:SetWidth(mainFrame:GetWidth())
+mainFrame.roleSelectionFrame:SetHeight(70)
+mainFrame.roleSelectionFrame:SetPoint("BOTTOM", mainFrame, "BOTTOM", 0, -75)
+
+mainFrame.roleSelectionFrame.TitleBg:SetHeight(30)
+mainFrame.roleSelectionFrame.title = mainFrame.roleSelectionFrame:CreateFrame("FontString", "NoxxLFGRoleSelectionFrameTitle", mainFrame.roleSelectionFrame, "GameFontHighlight")
+mainFrame.roleSelectionFrame.title:SetPoint("TOPLEFT", mainFrame.roleSelectionFrame.TitleBg, "TOPLEFT", 5, 0)
+mainFrame.roleSelectionFrame.title:SetText("Set Your NoxxLFG Role Below")
+mainFrame.roleSelectionFrame:Hide()
+
+--TODO ROLE SELECTION
+
 local sideWindow = CreateFrame("Frame", "NoxxLFGFSideWindow", mainFrame, "BasicFrameTemplateWithInset")
 sideWindow:SetSize(275, 300)
 sideWindow:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", 280, 0)
@@ -743,7 +747,7 @@ local settings = {
 			type = "Dropdown",
 			text = "NoxxLFG Window Scale",
 			key = "clientScale",
-			options = { "140%", "120", "110%", "100%", "90%", "80%" },
+			options = { "140%", "130%", "120%", "110%", "100%", "90%", "80%" },
 			defaultOption = "100%",
 			width = 60,
 			tooltip = "Set the scale of |cFFFFFFFFNoxxLFG|r.",
@@ -782,6 +786,11 @@ local settings = {
 			text = "Show Spam Groups",
 			key = "enableSpamGroups",
 			tooltip = 'Having this enabled will display "Multi-run" or "Spam" groups in the |cFFFFFFFFDungeons|r category.',
+		},
+		{
+			text = "Highlight My Role",
+			key = "highlightSetRole",
+			tooltip = 'While enabled, this will ensure posts with a matching role to yours is highlighted in |cFF00FF00Green|r.',
 		},
 	},
 	["Performance"] = {
@@ -3284,6 +3293,15 @@ local function addToDungeons(
 	})
 	foundFrame:SetBackdropBorderColor(0.7, 0.7, 0.7)
 
+	if NoxxLFGSettings.highlightSetRole then
+		for _, role in ipairs(rolesNeeded) do
+			if NoxxLFGSetRole.role == role then
+				foundFrame:SetBackdropBorderColor(0.0, 1, 0.0)
+				break
+			end
+		end
+	end
+
 	foundFrame.title = foundFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	foundFrame.title:SetPoint("CENTER", foundFrame, "CENTER", 0, 0)
 	foundFrame.title:SetScale(0.8)
@@ -3432,6 +3450,15 @@ local function addToRaids(shortMsg, msg, author, timePosted, raid, raidColor, cl
 		insets = { left = 4, right = 4, top = 4, bottom = 4 },
 	})
 	foundFrame:SetBackdropBorderColor(1, 0.35, 0.35)
+
+	if NoxxLFGSettings.highlightSetRole then
+		for _, role in ipairs(rolesNeeded) do
+			if NoxxLFGSetRole.role == role then
+				foundFrame:SetBackdropBorderColor(0.0, 1, 0.0)
+				break
+			end
+		end
+	end
 
 	foundFrame.title = foundFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	foundFrame.title:SetScale(0.8)
@@ -4469,11 +4496,7 @@ end
 
 SLASH_NLFGDEBUGSTATUS1 = "/nlfgdebugstatus"
 SlashCmdList["NLFGDEBUGSTATUS"] = function()
-	if NoxxLFGSettings.nlfgdebugmode then
-		print(NoxxLFGBlueColor .. addonName .. ":|r Debug mode is |cFFFFFF00disabled|r.")
-	else
-		print(NoxxLFGBlueColor .. addonName .. ":|r Debug mode is |cFFFFFF00enabled|r.")
-	end
+	print(NoxxLFGBlueColor .. addonName .. ":|r Debug mode is " .. (NoxxLFGSettings.nlfgdebugmode and "|cFFFFFF00enabled|r" or "|cFFFFFF00disabled|r") .. ".")
 end
 
 categorySearchBackButton:SetScript("OnClick", function()
