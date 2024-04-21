@@ -10,8 +10,8 @@
 -- N::::::::N      N::::::N                                                       L:::::::::L             F::::::::::::::::::::F  GGF:::::::::::::::G
 -- N:::::::::N     N::::::N                                                       LL:::::::LL             FF::::::FFFFFFFFF::::F G::::::GGGGGGGG::::G
 -- N::::::::::N    N::::::N   ooooooooooo xxxxxxx      xxxxxxxxxxxxxx      xxxxxxx  L:::::L                 F:::::F       FFFFFFG:::::G       GGGGGGG
--- N:::::::::::N   N::::::N oo:::::::::::oox:::::x    x:::::x  x:::::x    x:::::x   L:::::L                 F:::::F            G:::::G              
--- N:::::::N::::N  N::::::No:::::::::::::::ox:::::x  x:::::x    x:::::x  x:::::x    L:::::L                 F::::::FFFFFFFFFF  G:::::G              
+-- N:::::::::::N   N::::::N oo:::::::::::oox:::::x    x:::::x  x:::::x    x:::::x   L:::::L                 F:::::F            G:::::G
+-- N:::::::N::::N  N::::::No:::::::::::::::ox:::::x  x:::::x    x:::::x  x:::::x    L:::::L                 F::::::FFFFFFFFFF  G:::::G
 -- N::::::N N::::N N::::::No:::::ooooo:::::o x:::::xx:::::x      x:::::xx:::::x     L:::::L                 F:::::::::::::::F  G:::::G    GGGGGGGGGGG
 -- N::::::N  N::::N:::::::No::::o     o::::o  x::::::::::x        x::::::::::x      L:::::L                 F:::::::::::::::F  G:::::G    G:::::::::G
 -- N::::::N   N:::::::::::No::::o     o::::o   x::::::::x          x::::::::x       L:::::L                 F::::::FFFFFFFFFF  G:::::G    GGGGG:::::G
@@ -24,7 +24,6 @@
 
 ---@diagnostic disable: undefined-field
 
-NoxxLFG = NoxxLFG or {}
 NoxxLFGBlueColorNoC = "FF65A8E7"
 NoxxLFGBlueColor = "|c" .. NoxxLFGBlueColorNoC
 local addonName = "NoxxLFG"
@@ -77,10 +76,6 @@ end
 
 if not NoxxLFGSetRole then
 	NoxxLFGSetRole = {}
-end
-
-if not NoxxLFGSetRole.role then
-	NoxxLFGSetRole.role = "None"
 end
 
 if not NoxxLFGSettings.pausedSearching then
@@ -265,6 +260,7 @@ local dungeons = {
 			["Wicked Grotto (Purple)"] = { aliases = { "Purple", "WG", "Grotto", "Wicked" } },
 			["Foulspore Cavern (Orange)"] = { aliases = { "Orange", "Foulspore", "Cavern" } },
 			["Earth Song Falls (Inner)"] = { aliases = { "Earth Song", "Falls", "Inner" } },
+			["Wild Offerings"] = { aliases = { "Wild", "Offerings", "WO" } },
 		},
 		color = "FFEC9F6C",
 		checked = true,
@@ -572,17 +568,6 @@ mainFrame:SetScript("OnShow", function()
 	PlaySound(808)
 end)
 
-mainFrame.roleSelectionFrame = mainFrame:CreateFrame("Frame", "NoxxLFGRoleSelectionFrame", mainFrame, "BasicFrameTemplateWithInset")
-mainFrame.roleSelectionFrame:SetWidth(mainFrame:GetWidth())
-mainFrame.roleSelectionFrame:SetHeight(70)
-mainFrame.roleSelectionFrame:SetPoint("BOTTOM", mainFrame, "BOTTOM", 0, -75)
-
-mainFrame.roleSelectionFrame.TitleBg:SetHeight(30)
-mainFrame.roleSelectionFrame.title = mainFrame.roleSelectionFrame:CreateFrame("FontString", "NoxxLFGRoleSelectionFrameTitle", mainFrame.roleSelectionFrame, "GameFontHighlight")
-mainFrame.roleSelectionFrame.title:SetPoint("TOPLEFT", mainFrame.roleSelectionFrame.TitleBg, "TOPLEFT", 5, 0)
-mainFrame.roleSelectionFrame.title:SetText("Set Your NoxxLFG Role Below")
-mainFrame.roleSelectionFrame:Hide()
-
 --TODO ROLE SELECTION
 
 local sideWindow = CreateFrame("Frame", "NoxxLFGFSideWindow", mainFrame, "BasicFrameTemplateWithInset")
@@ -722,6 +707,17 @@ local function ShowReloadConfirmation()
 end
 
 local settings = {
+	["Character"] = {
+		{
+			type = "Dropdown",
+			text = "Your Character Role",
+			key = "role",
+			options = { "Not Set", "DPS", "Tank", "Healer" },
+			defaultOption = "Not Set",
+			width = 80,
+			tooltip = "When set, NoxxLFG will highlight posts that contain your role.",
+		},
+	},
 	["General Settings"] = {
 		{
 			type = "Dropdown",
@@ -815,7 +811,7 @@ local settings = {
 		{
 			text = "Highlight Role-Matching Posts",
 			key = "highlightSetRole",
-			tooltip = 'While enabled, this will ensure posts with a matching role to yours is highlighted in |cFF00FF00Green|r.',
+			tooltip = "While enabled, this will ensure posts with a matching role to yours is highlighted in |cFF00FF00Green|r.",
 		},
 	},
 	["Performance"] = {
@@ -853,12 +849,15 @@ local function CreateCheckbox(parent, id, label, tooltipText, point, dbKey)
 
 	checkbox:SetScript("OnClick", function(self)
 		NoxxLFGSettings[dbKey] = self:GetChecked()
+		if dbKey == "highlightSetRole" then
+			ShowReloadConfirmation()
+		end
 	end)
 
 	return checkbox
 end
 
-local function CreateDropdown(parent, id, label, tooltipText, point, dbKey, settingOptions, width)
+local function CreateDropdown(parent, id, label, tooltipText, point, dbKey, settingOptions, width, defaultOption)
 	local container = CreateFrame("Frame", parent:GetName() .. "Container" .. id, parent)
 	container:SetPoint(unpack(point))
 	container:SetSize(150, 40)
@@ -873,31 +872,58 @@ local function CreateDropdown(parent, id, label, tooltipText, point, dbKey, sett
 	dropdown:SetScale(0.8)
 	LibDD:UIDropDownMenu_SetWidth(dropdown, width)
 
-	if not NoxxLFGSettings[dbKey] or not tContains(settingOptions, NoxxLFGSettings[dbKey]) then
-		NoxxLFGSettings[dbKey] = NoxxLFGSettings[dbKey].defaultOption
+	if not dbKey == "role" then
+		if not NoxxLFGSettings[dbKey] or not tContains(settingOptions, NoxxLFGSettings[dbKey]) then
+			NoxxLFGSettings[dbKey] = defaultOption
+		end
+	else
+		if not NoxxLFGSetRole[dbKey] or not tContains(settingOptions, NoxxLFGSetRole[dbKey]) then
+			NoxxLFGSetRole[dbKey] = defaultOption
+		end
 	end
 
-	LibDD:UIDropDownMenu_SetText(dropdown, NoxxLFGSettings[dbKey])
+	if not dbKey == "role" then
+		LibDD:UIDropDownMenu_SetText(dropdown, NoxxLFGSettings[dbKey])
+	else
+		LibDD:UIDropDownMenu_SetText(dropdown, NoxxLFGSetRole[dbKey])
+	end
 
-	LibDD:UIDropDownMenu_Initialize(dropdown, function(self, level, menuList)
-		local info = LibDD:UIDropDownMenu_CreateInfo()
-		for _, option in ipairs(settingOptions) do
-			info.text = option
-			info.value = option
-			info.func = function(self)
-				NoxxLFGSettings[dbKey] = self.value
-				LibDD:UIDropDownMenu_SetText(dropdown, self.value)
-				LibDD:CloseDropDownMenus()
-				if dbKey == "clientScale" then
-					local clientScalePercent = strsplit("%", NoxxLFGSettings.clientScale) / 100
-					mainFrame:SetScale(clientScalePercent)
-					settingsFrame:SetScale(clientScalePercent)
+	if not dbKey == "role" then
+		LibDD:UIDropDownMenu_Initialize(dropdown, function(self, level, menuList)
+			local info = LibDD:UIDropDownMenu_CreateInfo()
+			for _, option in ipairs(settingOptions) do
+				info.text = option
+				info.value = option
+				info.func = function(self)
+					NoxxLFGSettings[dbKey] = self.value
+					LibDD:UIDropDownMenu_SetText(dropdown, self.value)
+					LibDD:CloseDropDownMenus()
+					if dbKey == "clientScale" then
+						local clientScalePercent = strsplit("%", NoxxLFGSettings.clientScale) / 100
+						mainFrame:SetScale(clientScalePercent)
+						settingsFrame:SetScale(clientScalePercent)
+					end
 				end
+				info.checked = (NoxxLFGSettings[dbKey] == option)
+				LibDD:UIDropDownMenu_AddButton(info)
 			end
-			info.checked = (NoxxLFGSettings[dbKey] == option)
-			LibDD:UIDropDownMenu_AddButton(info)
-		end
-	end)
+		end)
+	else
+		LibDD:UIDropDownMenu_Initialize(dropdown, function(self, level, menuList)
+			local info = LibDD:UIDropDownMenu_CreateInfo()
+			for _, option in ipairs(settingOptions) do
+				info.text = option
+				info.value = option
+				info.func = function(self)
+					NoxxLFGSetRole[dbKey] = self.value
+					LibDD:UIDropDownMenu_SetText(dropdown, self.value)
+					LibDD:CloseDropDownMenus()
+				end
+				info.checked = (NoxxLFGSetRole[dbKey] == option)
+				LibDD:UIDropDownMenu_AddButton(info)
+			end
+		end)
+	end
 
 	dropdown:SetScript("OnEnter", function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
@@ -1052,7 +1078,8 @@ local function CreateSettingsUI(settingsFrame)
 					point,
 					setting.key,
 					setting.options,
-					setting.width
+					setting.width,
+					setting.defaultOption
 				)
 			elseif setting.type == "Textbox" then
 				CreateSettingsTextBox(
@@ -3291,6 +3318,7 @@ local function addToDungeons(
 )
 	local frameWidth = categorySearchFrameChildDungeons:GetWidth() - 15
 	local frameHeight = 35
+	local roleHighlighted = false
 
 	local foundFrame = CreateFrame(
 		"Frame",
@@ -3322,6 +3350,15 @@ local function addToDungeons(
 	if NoxxLFGSettings.highlightSetRole then
 		for _, role in ipairs(rolesNeeded) do
 			if NoxxLFGSetRole.role == role then
+				roleHighlighted = true
+				foundFrame:SetBackdrop({
+					bgFile = "interface/garrison/garrisonuibackground2",
+					edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+					tile = true,
+					tileSize = 256,
+					edgeSize = 16,
+					insets = { left = 4, right = 4, top = 4, bottom = 4 },
+				})
 				foundFrame:SetBackdropBorderColor(0.0, 1, 0.0)
 				break
 			end
@@ -3334,7 +3371,9 @@ local function addToDungeons(
 	foundFrame.title:SetText((spamDungeon and "|cFFf27868Multi-run: |cFFFFFFFF" or "|cFFFFFFFF") .. shortMsg .. "|r")
 
 	foundFrameInteractions:SetScript("OnEnter", function()
-		foundFrame:SetBackdropBorderColor(0.9, 0.9, 0.9)
+		if not roleHighlighted then
+			foundFrame:SetBackdropBorderColor(0.9, 0.9, 0.9)
+		end
 		GameTooltip:SetOwner(foundFrameInteractions, "ANCHOR_BOTTOM", 0, -5)
 		if #msg > shortMessageLength then
 			GameTooltip:SetText("|cFFFFFFFF" .. msg, nil, nil, nil, nil, true)
@@ -3346,7 +3385,9 @@ local function addToDungeons(
 	foundFrameInteractions:SetScript("OnLeave", function()
 		GameTooltip:Hide()
 		GameTooltip:SetScale(1)
-		foundFrame:SetBackdropBorderColor(0.7, 0.7, 0.7)
+		if not roleHighlighted then
+			foundFrame:SetBackdropBorderColor(0.7, 0.7, 0.7)
+		end
 	end)
 
 	foundFrameInteractions:SetScript("OnMouseUp", function(self, button)
@@ -3449,6 +3490,7 @@ end
 local function addToRaids(shortMsg, msg, author, timePosted, raid, raidColor, classColor, rolesNeeded)
 	local frameWidth = categorySearchFrameChildRaids:GetWidth() - 15
 	local frameHeight = 35
+	local roleHighlighted = false
 
 	local foundFrame = CreateFrame(
 		"Frame",
@@ -3480,6 +3522,15 @@ local function addToRaids(shortMsg, msg, author, timePosted, raid, raidColor, cl
 	if NoxxLFGSettings.highlightSetRole then
 		for _, role in ipairs(rolesNeeded) do
 			if NoxxLFGSetRole.role == role then
+				roleHighlighted = true
+				foundFrame:SetBackdrop({
+					bgFile = "interface/garrison/classhallinternalbackground",
+					edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+					tile = true,
+					tileSize = 256,
+					edgeSize = 16,
+					insets = { left = 4, right = 4, top = 4, bottom = 4 },
+				})
 				foundFrame:SetBackdropBorderColor(0.0, 1, 0.0)
 				break
 			end
@@ -3492,7 +3543,9 @@ local function addToRaids(shortMsg, msg, author, timePosted, raid, raidColor, cl
 	foundFrame.title:SetText(shortMsg)
 
 	foundFrameInteractions:SetScript("OnEnter", function()
-		foundFrame:SetBackdropBorderColor(1, 0.70, 0.70)
+		if not roleHighlighted then
+			foundFrame:SetBackdropBorderColor(1, 0.70, 0.70)
+		end
 		GameTooltip:SetOwner(foundFrameInteractions, "ANCHOR_BOTTOM", 0, -5)
 		if #msg > shortMessageLength then
 			GameTooltip:SetText("|cFFFFFFFF" .. msg, nil, nil, nil, nil, true)
@@ -3504,7 +3557,9 @@ local function addToRaids(shortMsg, msg, author, timePosted, raid, raidColor, cl
 	foundFrameInteractions:SetScript("OnLeave", function()
 		GameTooltip:Hide()
 		GameTooltip:SetScale(1)
-		foundFrame:SetBackdropBorderColor(1, 0.35, 0.35)
+		if not roleHighlighted then
+			foundFrame:SetBackdropBorderColor(1, 0.35, 0.35)
+		end
 	end)
 
 	foundFrameInteractions:SetScript("OnMouseUp", function(self, button)
@@ -4348,6 +4403,7 @@ local function eventHandler(self, event, ...)
 								raidColor = raidColor,
 								classColor = classColor[englishClass],
 								raidRolesNeeded = raidRolesNeeded,
+								playerFaction = faction,
 							})
 							addToRaids(
 								trimmedMsg,
@@ -4522,7 +4578,13 @@ end
 
 SLASH_NLFGDEBUGSTATUS1 = "/nlfgdebugstatus"
 SlashCmdList["NLFGDEBUGSTATUS"] = function()
-	print(NoxxLFGBlueColor .. addonName .. ":|r Debug mode is " .. (NoxxLFGSettings.nlfgdebugmode and "|cFFFFFF00enabled|r" or "|cFFFFFF00disabled|r") .. ".")
+	print(
+		NoxxLFGBlueColor
+			.. addonName
+			.. ":|r Debug mode is "
+			.. (NoxxLFGSettings.nlfgdebugmode and "|cFFFFFF00enabled|r" or "|cFFFFFF00disabled|r")
+			.. "."
+	)
 end
 
 categorySearchBackButton:SetScript("OnClick", function()

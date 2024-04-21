@@ -27,6 +27,8 @@ Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 * .toc file updated to include latest funcs directory.
 * Role highlighting has been enabled and is a work in progress. Post borders will be highlighted in a green color depending on if the post has a matching role to the one you've set with NoxxLFG.
 * The NoxxLFG blue color has been lightened slightly.
+* Fix for Raids not saving across character logout sessions.
+* Support for Wild Offerings (WO) Maraudon
 
 **TODO/WIP**
 * **WIP:** More information in the "side window" for dungeons and raids when a player left-clicks a post.
