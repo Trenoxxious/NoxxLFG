@@ -396,7 +396,7 @@ local summons = {
 	},
 	{
 		name = "Tanaris",
-		aliases = { "Tanaris", "Steamwheedle", "Gadget", "ZF", "Zul'Farrak" },
+		aliases = { "Tanaris", "Steamwheedle", "Gadget", "Gadgetzan", "ZF", "Zul'Farrak", "ZulFarrak", "Zul Farrak" },
 		color = "FFBEA384",
 	},
 	{
@@ -416,7 +416,7 @@ local summons = {
 	},
 	{
 		name = "Ashenvale",
-		aliases = { "Ash", "Ashenvale" },
+		aliases = { "Ash", "Ashenvale", "Ashen" },
 		color = "FF936C97",
 	},
 	{
@@ -600,11 +600,11 @@ sideWindow.messageFrame.message:SetWidth(sideWindow.messageFrame:GetWidth() - 10
 sideWindow.messageFrame.message:SetJustifyH("LEFT")
 sideWindow.messageFrame.message:SetScale(0.9)
 sideWindow.messageFrame.message:SetWordWrap(true)
-sideWindow.messageFrame.spamDungeon = sideWindow:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+sideWindow.messageFrame.spamDungeon = sideWindow.messageFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 sideWindow.messageFrame.spamDungeon:SetScale(0.8)
-sideWindow.messageFrame.spamDungeon:SetPoint("TOPRIGHT", sideWindow.messageFrame, "TOPRIGHT", -5, 15)
+sideWindow.messageFrame.spamDungeon:SetPoint("BOTTOMRIGHT", sideWindow.messageFrame, "BOTTOMRIGHT", -8, 8)
 
-sideWindow.actionFrame = CreateFrame("Frame", "NoxxLFGSideWindowMessageFrame", sideWindow, "BackdropTemplate")
+sideWindow.actionFrame = CreateFrame("Frame", "NoxxLFGSideWindowActionFrame", sideWindow, "BackdropTemplate")
 sideWindow.actionFrame:SetPoint("TOPLEFT", sideWindow.messageFrame, "BOTTOMLEFT", 0, -5)
 sideWindow.actionFrame:SetWidth(sideWindow:GetWidth() - 20)
 sideWindow.actionFrame:SetHeight(60)
@@ -635,6 +635,11 @@ sideWindow.actionFrame.whoButton:SetFrameStrata("DIALOG")
 sideWindow.actionFrame.whoButton:SetPoint("LEFT", sideWindow.actionFrame.inviteButton, "RIGHT", 5, 0)
 sideWindow.actionFrame.whoButton:SetSize(115, 20)
 sideWindow.actionFrame.whoButton:SetText("/who Player")
+
+sideWindow.actionFrame.locationInfo = sideWindow.actionFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+sideWindow.actionFrame.locationInfo:SetJustifyH("LEFT")
+sideWindow.actionFrame.locationInfo:SetPoint("BOTTOMLEFT", sideWindow.actionFrame, "BOTTOMLEFT", 3, -40)
+
 sideWindow:Hide()
 
 local settingsFrame = CreateFrame("Frame", "NoxxLFGSettingsFrame", UIParent, "BasicFrameTemplateWithInset")
@@ -870,7 +875,7 @@ local function CreateDropdown(parent, id, label, tooltipText, point, dbKey, sett
 	dropdown:SetScale(0.8)
 	LibDD:UIDropDownMenu_SetWidth(dropdown, width)
 
-	if not dbKey == "role" then
+	if dbKey ~= "role" then
 		if not NoxxLFGSettings[dbKey] or not tContains(settingOptions, NoxxLFGSettings[dbKey]) then
 			NoxxLFGSettings[dbKey] = defaultOption
 		end
@@ -880,13 +885,13 @@ local function CreateDropdown(parent, id, label, tooltipText, point, dbKey, sett
 		end
 	end
 
-	if not dbKey == "role" then
+	if dbKey ~= "role" then
 		LibDD:UIDropDownMenu_SetText(dropdown, NoxxLFGSettings[dbKey])
 	else
 		LibDD:UIDropDownMenu_SetText(dropdown, NoxxLFGSetRole[dbKey])
 	end
 
-	if not dbKey == "role" then
+	if dbKey ~= "role" then
 		LibDD:UIDropDownMenu_Initialize(dropdown, function(self, level, menuList)
 			local info = LibDD:UIDropDownMenu_CreateInfo()
 			for _, option in ipairs(settingOptions) do
@@ -1376,6 +1381,7 @@ local postAGroupText = lfmlfgButtonGroup:CreateFontString(nil, "ARTWORK", "GameF
 postAGroupText:SetPoint("TOP", lfmlfgButtonGroup, "TOP", 0, 20)
 postAGroupText:SetText(headerColor .. "Post a Group Advertisement:")
 
+---@diagnostic disable-next-line: param-type-mismatch
 postAGroupText:SetScript("OnEnter", function(self)
 	GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
 	GameTooltip:SetText("Posting Info:")
@@ -1384,6 +1390,7 @@ postAGroupText:SetScript("OnEnter", function(self)
 	GameTooltip:Show()
 end)
 
+---@diagnostic disable-next-line: param-type-mismatch
 postAGroupText:SetScript("OnLeave", function()
 	GameTooltip:Hide()
 end)
@@ -3147,7 +3154,7 @@ checkAllDungeonsButton:SetScript("OnClick", CheckAllDungeons)
 local function initializeDungeonDropdown(self, level)
 	local info = LibDD:UIDropDownMenu_CreateInfo()
 	for i, dungeon in ipairs(dungeons) do
-		info.text = dungeon.name
+		info.text = "|c" .. dungeon.color .. dungeon.name .. " |r(Lv. " .. dungeon.levelRange .. ")"
 		info.isNotRadio = true
 		info.keepShownOnClick = true
 		info.func = function(self)
@@ -3171,7 +3178,7 @@ LibDD:UIDropDownMenu_SetText(raidFilterDropdown, "Filter Raids")
 local function initializeRaidDropdown(self, level)
 	local info = LibDD:UIDropDownMenu_CreateInfo()
 	for i, raid in ipairs(raids) do
-		info.text = raid.name
+		info.text = "|c" .. raid.color .. raid.name .. " |r(Lv. " .. raid.levelRange .. ")"
 		info.isNotRadio = true
 		info.keepShownOnClick = true
 		info.func = function(self)
@@ -3388,16 +3395,24 @@ local function addToDungeons(
 		end
 	end)
 
+	local dungeonInfo = getDungeonByName(dungeon)
+
 	foundFrameInteractions:SetScript("OnMouseUp", function(self, button)
 		PlaySound(808)
-		if button == "LeftButton" then
+		if button == "LeftButton" and not IsShiftKeyDown() then
 			if author:sub(-1) == "s" then
 				sideWindow.title:SetText("|c" .. classColor .. author .. "'|r Dungeon Post")
 			else
 				sideWindow.title:SetText("|c" .. classColor .. author .. "'s|r Dungeon Post")
 			end
 
-			sideWindow.activityTitle:SetText("|c" .. dungeonColor .. dungeon)
+			sideWindow.activityTitle:SetText(
+				"|c"
+					.. dungeonColor
+					.. dungeon
+					.. "|r"
+					.. (dungeonInfo and " (Lv. " .. dungeonInfo.levelRange .. ")" or "")
+			)
 
 			if subDungeon and subDungeon ~= "None" then
 				sideWindow.activityTitleSub:SetText("Wing: |cFFFFFFFF" .. subDungeon .. "|r")
@@ -3420,6 +3435,10 @@ local function addToDungeons(
 			)
 			sideWindow:Show()
 
+			sideWindow.actionFrame.locationInfo:SetText(
+				"|cFFFFFFFFLocation: |r\n\n" .. (dungeonInfo and dungeonInfo.location or "")
+			)
+
 			sideWindow.actionFrame.inviteButton:SetScript("OnClick", function()
 				DEFAULT_CHAT_FRAME.editBox:SetText("/invite " .. author)
 				ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)
@@ -3435,6 +3454,9 @@ local function addToDungeons(
 		elseif button == "RightButton" and IsShiftKeyDown() then
 			DEFAULT_CHAT_FRAME.editBox:SetText("/invite " .. author)
 			ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)
+		elseif button == "LeftButton" and IsShiftKeyDown() then
+			PlaySound(808)
+			ChatFrame_OpenChat("/w " .. author .. " ")
 		end
 	end)
 
@@ -3560,15 +3582,19 @@ local function addToRaids(shortMsg, msg, author, timePosted, raid, raidColor, cl
 		end
 	end)
 
+	local raidInfo = getRaidByName(raid)
+
 	foundFrameInteractions:SetScript("OnMouseUp", function(self, button)
-		if button == "LeftButton" then
+		if button == "LeftButton" and not IsShiftKeyDown() then
 			if author:sub(-1) == "s" then
 				sideWindow.title:SetText("|c" .. classColor .. author .. "'|r Dungeon Post")
 			else
 				sideWindow.title:SetText("|c" .. classColor .. author .. "'s|r Dungeon Post")
 			end
 
-			sideWindow.activityTitle:SetText("|c" .. raidColor .. raid)
+			sideWindow.activityTitle:SetText(
+				"|c" .. raidColor .. raid .. "|r" .. (raidInfo and " (Lv. " .. raidInfo.levelRange .. ")" or "")
+			)
 
 			-- if subRaid and subRaid ~= "None" then
 			-- 	sideWindow.activityTitleSub:SetText("Wing: |cFFFFFFFF" .. subRaid .. "|r")
@@ -3582,6 +3608,10 @@ local function addToRaids(shortMsg, msg, author, timePosted, raid, raidColor, cl
 				"|c" .. classColor .. author .. ":|r " .. "|cFFFFFFFF" .. msg .. "|r"
 			)
 			sideWindow:Show()
+
+			sideWindow.actionFrame.locationInfo:SetText(
+				"|cFFFFFFFFLocation: |r\n\n" .. (raidInfo and raidInfo.location or "")
+			)
 
 			sideWindow.actionFrame.inviteButton:SetScript("OnClick", function()
 				DEFAULT_CHAT_FRAME.editBox:SetText("/invite " .. author)
@@ -3598,6 +3628,9 @@ local function addToRaids(shortMsg, msg, author, timePosted, raid, raidColor, cl
 		elseif button == "RightButton" and IsShiftKeyDown() then
 			DEFAULT_CHAT_FRAME.editBox:SetText("/invite " .. author)
 			ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)
+		elseif button == "LeftButton" and IsShiftKeyDown() then
+			PlaySound(808)
+			ChatFrame_OpenChat("/w " .. author .. " ")
 		end
 	end)
 
@@ -3979,6 +4012,11 @@ local function eventHandler(self, event, ...)
 				if msgLower:find(ignorePhrase:lower()) then
 					return false, nil
 				end
+			end
+
+			local goldPattern = "(%d+[%.,/%d]*%d*)%s*[gG]"
+			if msgLower:match(goldPattern) then
+				return false, nil
 			end
 
 			if msgLower:find(("SPAM"):lower()) then
