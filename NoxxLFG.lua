@@ -568,8 +568,6 @@ mainFrame:SetScript("OnShow", function()
 	PlaySound(808)
 end)
 
---TODO ROLE SELECTION
-
 local sideWindow = CreateFrame("Frame", "NoxxLFGFSideWindow", mainFrame, "BasicFrameTemplateWithInset")
 sideWindow:SetSize(275, 300)
 sideWindow:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", 280, 0)
