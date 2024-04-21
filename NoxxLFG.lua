@@ -1,4 +1,29 @@
+-- [NoxxLFG @ https://www.curseforge.com/wow/addons/noxxlfg]
+
+-- Construct and post messages that dynamically update as you build your group.
+-- Quickly find what you need by using at-a-glance icons like gold/silver amount for travel or role icons for raid/dungeon finding!
+-- Select the specific category you need to keep the LFG frame light and focused on a specific type of group you're trying to find.
+-- By default, NoxxLFG will not log groups or posts unless you are using it, reserving your memory for more important things.
+
+-- NNNNNNNN        NNNNNNNN                                                       LLLLLLLLLLL             FFFFFFFFFFFFFFFFFFFFFF       GGGGGGGGGGGGGG
+-- N:::::::N       N::::::N                                                       L:::::::::L             F::::::::::::::::::::F    GGGG::::::::::::G
+-- N::::::::N      N::::::N                                                       L:::::::::L             F::::::::::::::::::::F  GGF:::::::::::::::G
+-- N:::::::::N     N::::::N                                                       LL:::::::LL             FF::::::FFFFFFFFF::::F G::::::GGGGGGGG::::G
+-- N::::::::::N    N::::::N   ooooooooooo xxxxxxx      xxxxxxxxxxxxxx      xxxxxxx  L:::::L                 F:::::F       FFFFFFG:::::G       GGGGGGG
+-- N:::::::::::N   N::::::N oo:::::::::::oox:::::x    x:::::x  x:::::x    x:::::x   L:::::L                 F:::::F            G:::::G              
+-- N:::::::N::::N  N::::::No:::::::::::::::ox:::::x  x:::::x    x:::::x  x:::::x    L:::::L                 F::::::FFFFFFFFFF  G:::::G              
+-- N::::::N N::::N N::::::No:::::ooooo:::::o x:::::xx:::::x      x:::::xx:::::x     L:::::L                 F:::::::::::::::F  G:::::G    GGGGGGGGGGG
+-- N::::::N  N::::N:::::::No::::o     o::::o  x::::::::::x        x::::::::::x      L:::::L                 F:::::::::::::::F  G:::::G    G:::::::::G
+-- N::::::N   N:::::::::::No::::o     o::::o   x::::::::x          x::::::::x       L:::::L                 F::::::FFFFFFFFFF  G:::::G    GGGGG:::::G
+-- N::::::N    N::::::::::No::::o     o::::o   x::::::::x          x::::::::x       L:::::L                 F:::::F            G:::::G        G:::::G
+-- N::::::N     N:::::::::No::::o     o::::o  x::::::::::x        x::::::::::x      L:::::L         LLLLLL  F:::::F             G:::::G       G:::::G
+-- N::::::N      N::::::::No:::::ooooo:::::o x:::::xx:::::x      x:::::xx:::::x   LL:::::::LLLLLLLLL:::::LFF:::::::FF            G:::::GGGGGGGG:::::G
+-- N::::::N       N:::::::No:::::::::::::::ox:::::x  x:::::x    x:::::x  x:::::x  L::::::::::::::::::::::LF::::::::FF             GG::::::::::::::::G
+-- N::::::N        N::::::N oo:::::::::::oox:::::x    x:::::x  x:::::x    x:::::x L::::::::::::::::::::::LF::::::::FF               GGG::::::GGG::::G
+-- NNNNNNNN         NNNNNNN   ooooooooooo xxxxxxx      xxxxxxxxxxxxxx      xxxxxxxLLLLLLLLLLLLLLLLLLLLLLLLFFFFFFFFFFF                  GGGGGG   GGGGG
+
 ---@diagnostic disable: undefined-field
+
 NoxxLFG = NoxxLFG or {}
 NoxxLFGBlueColorNoC = "FF65A8E7"
 NoxxLFGBlueColor = "|c" .. NoxxLFGBlueColorNoC
@@ -647,31 +672,31 @@ settingsFrame:SetScript("OnDragStop", function(self)
 end)
 settingsFrame:Hide()
 
-local settingsButton = CreateFrame("Button", "NoxxLFGSettingsButtonFrame", mainFrame)
-settingsButton:SetSize(24, 24)
-settingsButton:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", -14, -32)
-settingsButton.settingsButtonTexture = settingsButton:CreateTexture(nil, "OVERLAY")
-settingsButton.settingsButtonTexture:SetAllPoints(settingsButton)
-settingsButton.settingsButtonTexture:SetTexture("Interface\\AddOns\\NoxxLFG\\images\\settingbuttonatlas")
-settingsButton.settingsButtonTexture:SetTexCoord(0, 0.5, 0, 0.5)
+mainFrame.settingsButton = CreateFrame("Button", "NoxxLFGSettingsButtonFrame", mainFrame)
+mainFrame.settingsButton:SetSize(24, 24)
+mainFrame.settingsButton:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", -14, -32)
+mainFrame.settingsButton.settingsButtonTexture = mainFrame.settingsButton:CreateTexture(nil, "OVERLAY")
+mainFrame.settingsButton.settingsButtonTexture:SetAllPoints(mainFrame.settingsButton)
+mainFrame.settingsButton.settingsButtonTexture:SetTexture("Interface\\AddOns\\NoxxLFG\\images\\settingbuttonatlas")
+mainFrame.settingsButton.settingsButtonTexture:SetTexCoord(0, 0.5, 0, 0.5)
 
-settingsButton:SetScript("OnEnter", function()
-	settingsButton.settingsButtonTexture:SetTexCoord(0.5, 1, 0, 0.5)
+mainFrame.settingsButton:SetScript("OnEnter", function()
+	mainFrame.settingsButton.settingsButtonTexture:SetTexCoord(0.5, 1, 0, 0.5)
 end)
 
-settingsButton:SetScript("OnLeave", function()
-	settingsButton.settingsButtonTexture:SetTexCoord(0, 0.5, 0, 0.5)
+mainFrame.settingsButton:SetScript("OnLeave", function()
+	mainFrame.settingsButton.settingsButtonTexture:SetTexCoord(0, 0.5, 0, 0.5)
 end)
 
-settingsButton:SetScript("OnMouseDown", function()
+mainFrame.settingsButton:SetScript("OnMouseDown", function()
 	PlaySound(808)
-	settingsButton.settingsButtonTexture:SetTexCoord(0, 0.5, 0.5, 1)
+	mainFrame.settingsButton.settingsButtonTexture:SetTexCoord(0, 0.5, 0.5, 1)
 end)
 
-settingsButton:SetScript("OnMouseUp", function()
+mainFrame.settingsButton:SetScript("OnMouseUp", function()
 	mainFrame:Hide()
 	settingsFrame:Show()
-	settingsButton.settingsButtonTexture:SetTexCoord(0, 0.5, 0, 0.5)
+	mainFrame.settingsButton.settingsButtonTexture:SetTexCoord(0, 0.5, 0, 0.5)
 end)
 
 settingsFrame:SetScript("OnHide", function(self)
@@ -788,7 +813,7 @@ local settings = {
 			tooltip = 'Having this enabled will display "Multi-run" or "Spam" groups in the |cFFFFFFFFDungeons|r category.',
 		},
 		{
-			text = "Highlight My Role",
+			text = "Highlight Role-Matching Posts",
 			key = "highlightSetRole",
 			tooltip = 'While enabled, this will ensure posts with a matching role to yours is highlighted in |cFF00FF00Green|r.',
 		},
@@ -812,6 +837,7 @@ local function CreateCheckbox(parent, id, label, tooltipText, point, dbKey)
 	if NoxxLFGSettings[dbKey] == nil then
 		NoxxLFGSettings[dbKey] = true
 	end
+
 	checkbox:SetChecked(NoxxLFGSettings[dbKey])
 
 	checkbox:SetScript("OnEnter", function(self)
