@@ -3,17 +3,12 @@
 
 Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 
-**Current Stable Version:** 1.4.0\
-*Development Version:* 1.4.1
+**Current Stable Version:** 1.4.1\
+*Development Version:* 1.4.2
 
 #### Development Version Updates
-**Upcoming v1.4.1 Updates (Ready for Release)**
-* Shift + Left-click will now start a whisper when within the Dungeons and Raids categories.
-* Dungeon and Raid names are now colored in their respective dropdown menus.
-* Dungeons and Raids dropdown menus now include their respective dungeon or raid level range.
-* The side window of Dungeons and Raids that displays information now includes their appropriate levels and locations.
-* Dungeons or Raids groups that match a gold pattern ex. "2g", "3.5g", "1,5g", etc. will now be excluded from Dungeons and Raids posts shown in their respective categories.
-* Fix for non "role" database keys not saving settings properly.
+**Upcoming v1.4.2 Updates (Ready for Release)**
+* None
 
 **TODO/WIP**
 * **WIP:** Filtering for Events & PvP Category.
