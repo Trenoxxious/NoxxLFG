@@ -707,6 +707,13 @@ local function ShowReloadConfirmation()
 end
 
 local settings = {
+	["Performance"] = {
+		{
+			text = "Update While Only In-Use",
+			key = "enableUpdateInUse",
+			tooltip = "This will only update your |cFFFFFFFFNoxxLFG list|r while you have the relevant page showing.\n\n|cFFFFFF00Disabling this may cause performance hitches based on your realm population. Looking good unfortunately comes with its cost.",
+		},
+	},
 	["Character"] = {
 		{
 			type = "Dropdown",
@@ -812,13 +819,6 @@ local settings = {
 			text = "Highlight Role-Matching Posts",
 			key = "highlightSetRole",
 			tooltip = "While enabled, this will ensure posts with a matching role to yours is highlighted in |cFF00FF00Green|r.",
-		},
-	},
-	["Performance"] = {
-		{
-			text = "Update While Only In-Use",
-			key = "enableUpdateInUse",
-			tooltip = "This will only update your |cFFFFFFFFNoxxLFG list|r while you have the relevant page showing.\n\n|cFFFFFF00Disabling this may cause performance hitches based on your realm population. Looking good unfortunately comes with its cost.",
 		},
 	},
 }
