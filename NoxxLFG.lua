@@ -508,7 +508,7 @@ local worldEvents = {
 	{
 		type = "PvP",
 		name = "Blood Moon (PvP)",
-		aliases = { "BM", "Blood Moon", "Bloodmoon" },
+		aliases = { "BM", "Blood Moon", "Bloodmoon", "STV" },
 		color = "FFE42F29",
 	},
 	{

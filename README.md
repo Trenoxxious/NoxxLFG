@@ -11,6 +11,7 @@ Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 * Any open popups to re-post a message will now close if the conditions of the post are met post-popup.
 * Adjustment to "need phrasing" to find roles more consistently.
 * Fix for raid side window interface text that was showing "Dungeon Group" instead of "Raid Group"
+* Blood Moon event now parses when a user uses "STV" while looking for a group.
 
 **TODO/WIP**
 * **WIP:** Filtering for Events & PvP Category.
