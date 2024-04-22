@@ -2285,6 +2285,7 @@ lfmPostButtonAuto:SetScript("OnClick", function()
 					.. addonName
 					.. ": |cFFFFFF00Posting canceled. |r|rYou will no longer receive reminders to post your message."
 			)
+			postButtonFrame:Hide()
 			neededFrame:Hide()
 			CancelTimer()
 			CancelLFGTimer()
@@ -2314,6 +2315,7 @@ lfgPostButtonAuto:SetScript("OnClick", function()
 					.. addonName
 					.. ": |cFFFFFF00Posting canceled. |r|rYou will no longer receive reminders to post your message."
 			)
+			postButtonFrame:Hide()
 			CancelLFGTimer()
 			CancelTimer()
 		end
@@ -2562,6 +2564,7 @@ local function OnSystemMessage(self, event, message)
 				.. addonName
 				.. ": |cFFFFFF00Fulfillment has been met for your LFM/LFG Post. |r|rYou will no longer receive reminders to post your message."
 		)
+		postButtonFrame:Hide()
 		ResetLFMMessage()
 		CancelTimer()
 		ResetLFGMessage()
@@ -3587,9 +3590,9 @@ local function addToRaids(shortMsg, msg, author, timePosted, raid, raidColor, cl
 	foundFrameInteractions:SetScript("OnMouseUp", function(self, button)
 		if button == "LeftButton" and not IsShiftKeyDown() then
 			if author:sub(-1) == "s" then
-				sideWindow.title:SetText("|c" .. classColor .. author .. "'|r Dungeon Post")
+				sideWindow.title:SetText("|c" .. classColor .. author .. "'|r Raid Post")
 			else
-				sideWindow.title:SetText("|c" .. classColor .. author .. "'s|r Dungeon Post")
+				sideWindow.title:SetText("|c" .. classColor .. author .. "'s|r Raid Post")
 			end
 
 			sideWindow.activityTitle:SetText(
@@ -3974,7 +3977,7 @@ end
 local function eventHandler(self, event, ...)
 	local msg, author, language, channelString, target, flags, _, channelNumber, channelName, _, counter, guid = ...
 
-	local needPhrases = { "LFM", "Looking for More", "LF", "Need" }
+	local needPhrases = { "LFM", "Looking for", "LF", "Need" }
 	local rolesTable = {
 		{
 			name = "Healer",
@@ -4039,11 +4042,8 @@ local function eventHandler(self, event, ...)
 				needsTable = {}
 
 				for _, needphrase in ipairs(needPhrases) do
-					local neededPhraseFound = false
 					local startIndex, endIndex = msgLower:find(needphrase:lower())
 					if startIndex then
-						neededPhraseFound = true
-
 						local messageAfterNeedPhrase = msgLower:sub(endIndex + 1)
 
 						for _, roleneeded in ipairs(rolesTable) do

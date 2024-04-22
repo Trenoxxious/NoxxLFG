@@ -8,7 +8,9 @@ Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 
 #### Development Version Updates
 **Upcoming v1.4.2 Updates (Ready for Release)**
-* None
+* Any open popups to re-post a message will now close if the conditions of the post are met post-popup.
+* Adjustment to "need phrasing" to find roles more consistently.
+* Fix for raid side window interface text that was showing "Dungeon Group" instead of "Raid Group"
 
 **TODO/WIP**
 * **WIP:** Filtering for Events & PvP Category.
