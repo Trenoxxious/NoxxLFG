@@ -3,15 +3,12 @@
 
 Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 
-**Current Stable Version:** 1.4.1\
-*Development Version:* 1.4.2
+**Current Stable Version:** 1.4.2\
+*Development Version:* 1.4.3
 
 #### Development Version Updates
-**Upcoming v1.4.2 Updates (Ready for Release)**
-* Any open popups to re-post a message will now close if the conditions of the post are met post-popup.
-* Adjustment to "need phrasing" to find roles more consistently.
-* Fix for raid side window interface text that was showing "Dungeon Group" instead of "Raid Group"
-* Blood Moon event now parses when a user uses "STV" while looking for a group.
+**Upcoming v1.4.3 Updates (Ready for Release)**
+* None
 
 **TODO/WIP**
 * **WIP:** Filtering for Events & PvP Category.
