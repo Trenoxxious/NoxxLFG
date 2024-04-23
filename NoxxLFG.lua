@@ -27,7 +27,7 @@
 NoxxLFGBlueColorNoC = "FF65A8E7"
 NoxxLFGBlueColor = "|c" .. NoxxLFGBlueColorNoC
 local addonName = "NoxxLFG"
-local versionNum = "1.4.1"
+local versionNum = "1.4.2"
 local LibDD = LibStub:GetLibrary("LibUIDropDownMenu-4.0")
 local shortMessageLength = 35
 local hoveredCategory = false
