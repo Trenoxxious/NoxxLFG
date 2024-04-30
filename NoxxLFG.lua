@@ -278,6 +278,7 @@ local dungeons = {
 		location = "Blackrock Mountain (Upper)",
 		levelRange = "55-60",
 		aliases = {
+			"Blackrock Spire",
 			"BRS",
 			"UBRS",
 			"LBRS",
@@ -297,7 +298,7 @@ local raids = {
 		name = "Blackfathom Deeps",
 		location = "Ashenvale (Western Coast)",
 		levelRange = "25",
-		aliases = { "BFD", "Blackfathom Deeps", "Black Fathom Deeps", "Deeps" },
+		aliases = { "BFD", "Blackfathom", "Black Fathom Deeps", "Deeps" },
 		color = "FF3E8AEE",
 		checked = true,
 	},
