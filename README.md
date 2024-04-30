@@ -8,7 +8,7 @@ Find NoxxLFG on CurseForge @ https://www.curseforge.com/wow/addons/noxxlfg
 
 #### Development Version Updates
 **Upcoming v1.4.3 Updates (Ready for Release)**
-* None
+* Update to some Dungeon and Raid name aliases.
 
 **TODO/WIP**
 * **WIP:** Filtering for Events & PvP Category.
