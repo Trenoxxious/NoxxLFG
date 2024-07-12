@@ -341,6 +341,14 @@ local dungeons = {
 		color = "FFEB84C4",
 		checked = true,
 	},
+	{
+		name = "Demon Fall Canyon",
+		location = "Felwood (Emerald Sanctuary)",
+		levelRange = "55-60",
+		aliases = { "DFC", "Demon Fall", "Canyon", "DF" },
+		color = "FF8FDDA9",
+		checked = true,
+	},
 }
 
 local raids = {
@@ -643,6 +651,15 @@ local worldEvents = {
 			["Alterac Valley"] = { aliases = { "AV", "Alterac", "Valley" } },
 		},
 		color = "FFCA9354",
+	},
+	{
+		type = "PvE",
+		name = "Blackrock Eruption",
+		aliases = {
+			"BRE",
+			"Blackrock Eruption",
+		},
+		color = "FFEE8E7D",
 	},
 }
 
