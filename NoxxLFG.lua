@@ -4773,6 +4773,51 @@ local function OnEvent(self, event, arg1)
 		CreateSettingsUI(settingsFrame)
 		CheckIfPaused()
 
+        if not NoxxMinimapPosDB then
+            NoxxMinimapPosDB = {}
+        end
+        
+        if not NoxxMinimapPosDB.minimap then
+            NoxxMinimapPosDB.minimap = {
+                hide = false,
+                minimapPos = 220,
+            }
+        end
+        
+        local LDB = LibStub("LibDataBroker-1.1", true)
+        local NoxxMinimapIcon = LibStub("LibDBIcon-1.0", true)
+        
+        if LDB and NoxxMinimapIcon then
+            local miniButton = LDB:NewDataObject("NoxxLFG", {
+                type = "data source",
+                text = "NoxxLFG",
+                icon = "Interface\\AddOns\\NoxxLFG\\images\\minimap.tga",
+                OnClick = function(self, btn)
+                    if not mainFrame:IsShown() then
+                        mainFrame:Show()
+                    else
+                        mainFrame:Hide()
+                    end
+                end,
+        
+                OnTooltipShow = function(tooltip)
+                    if not tooltip or not tooltip.AddLine then
+                        return
+                    end
+                    tooltip:AddLine(NoxxLFGBlueColor .. addonName .. "\n\nLeft-click: |rOpen " .. addonName, nil, nil, nil, nil)
+                end,
+            })
+        
+            -- Register and show the minimap button with direct reference to saved variables
+            if miniButton then
+                local success = pcall(function()
+                    -- Pass the saved variables table directly so LibDBIcon can modify it
+                    NoxxMinimapIcon:Register("NoxxLFG", miniButton, NoxxMinimapPosDB.minimap)
+                    NoxxMinimapIcon:Show("NoxxLFG")
+                end)
+            end
+        end
+
 		if NoxxLFGSettings.nlfgdebugmode then
 			print(NoxxLFGBlueColor .. addonName .. ":|r You are currently running NoxxLFG in debug mode!")
 		end
@@ -4928,45 +4973,3 @@ function ToggleNoxxLFGWindowBind(openDungeons)
 		mainFrame:Hide()
 	end
 end
-
-local addon = LibStub("AceAddon-3.0"):NewAddon("NoxxLFG")
-
-local miniButton = LibStub("LibDataBroker-1.1"):NewDataObject("NoxxLFG", {
-	type = "data source",
-	text = "NoxxLFG",
-	icon = "Interface\\AddOns\\NoxxLFG\\images\\minimap.tga",
-	OnClick = function(self, btn)
-		if not mainFrame:IsShown() then
-			mainFrame:Show()
-		else
-			mainFrame:Hide()
-		end
-	end,
-
-	OnTooltipShow = function(tooltip)
-		if not tooltip or not tooltip.AddLine then
-			return
-		end
-
-		tooltip:AddLine(NoxxLFGBlueColor .. addonName .. "\n\nLeft-click: |rOpen " .. addonName, nil, nil, nil, nil)
-	end,
-})
-
-NoxxMinimapIcon = LibStub("LibDBIcon-1.0", true)
-
----@diagnostic disable-next-line: duplicate-set-field
-function addon:OnInitialize()
-	---@diagnostic disable-next-line: inject-field
-	self.db = LibStub("AceDB-3.0"):New("NoxxMinimapPosDB", {
-		profile = {
-			minimap = {
-				hide = false,
-			},
-		},
-	})
-
-	---@diagnostic disable-next-line: param-type-mismatch
-	NoxxMinimapIcon:Register("NoxxLFG", miniButton, self.db.profile.minimap)
-end
-
-NoxxMinimapIcon:Show("NoxxLFG")
